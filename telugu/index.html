@@ -3,451 +3,491 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>JioTV M3U Parser & Stream Link Generator</title>
+    <title>M3U to Encoded Stream Link · JioTV Clearkey Parser</title>
     <style>
         * {
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #060a14);
             margin: 0;
             min-height: 100vh;
-            padding: 24px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #eef2ff;
+            padding: 2rem 1.5rem;
+            color: #edf2ff;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
         }
 
         .card {
-            max-width: 1200px;
-            width: 100%;
-            background: rgba(18, 25, 45, 0.85);
-            backdrop-filter: blur(4px);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(75, 130, 255, 0.15);
+            background: rgba(12, 20, 35, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(66, 153, 225, 0.2);
             overflow: hidden;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
-        .header {
-            background: #0f172f;
+        .card-header {
+            background: #0b1120;
             padding: 1.5rem 2rem;
-            border-bottom: 1px solid #2d3a5e;
+            border-bottom: 1px solid #1f2a44;
         }
 
-        .header h1 {
-            margin: 0;
+        .card-header h1 {
             font-size: 1.8rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #C0E0FF, #6c8eff);
+            font-weight: 700;
+            background: linear-gradient(120deg, #b9e0ff, #7c9eff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: -0.2px;
+            margin: 0;
+            letter-spacing: -0.3px;
         }
 
-        .header p {
-            margin: 0.5rem 0 0;
-            color: #8e9fc3;
+        .card-header p {
+            color: #8ea1c7;
+            margin-top: 0.5rem;
             font-size: 0.9rem;
         }
 
-        .content {
+        .card-body {
             padding: 2rem;
         }
 
-        .raw-data {
-            background: #0b0f1c;
+        .input-area {
+            background: #070c17;
             border-radius: 1.5rem;
-            padding: 1rem 1.5rem;
-            border: 1px solid #2a3650;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.8rem;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-break: break-word;
-            color: #b9c7e0;
-            margin-bottom: 2rem;
-        }
-
-        .info-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.2rem;
-            margin-bottom: 2rem;
-            background: #0e1428;
-            border-radius: 1.5rem;
-            padding: 1rem 1.5rem;
             border: 1px solid #253153;
+            margin-bottom: 2rem;
+            overflow: hidden;
         }
 
-        .info-chip {
-            background: #111a2c;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 3px solid #3b82f6;
-        }
-
-        .info-chip strong {
-            color: #90b4ff;
-        }
-
-        .output-section {
-            background: #070c1a;
-            border-radius: 1.5rem;
-            padding: 1.2rem 1.5rem;
-            margin: 1.8rem 0;
-            border: 1px solid #2e3b5a;
-            transition: 0.2s;
-        }
-
-        .output-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            color: #6c86b0;
-            margin-bottom: 0.75rem;
+        .input-label {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: #0e1428;
+            padding: 0.8rem 1.2rem;
+            font-weight: 500;
+            border-bottom: 1px solid #1f2a46;
+            font-size: 0.85rem;
         }
 
-        .stream-link-box {
-            background: #03060e;
-            padding: 1rem;
-            border-radius: 1rem;
-            font-family: monospace;
+        textarea {
+            width: 100%;
+            background: #03070f;
+            border: none;
+            color: #d6e3ff;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
             font-size: 0.8rem;
-            word-break: break-all;
-            white-space: pre-wrap;
-            border: 1px solid #2c3d66;
-            color: #c3d6ff;
-            margin: 12px 0;
+            padding: 1.2rem;
+            resize: vertical;
+            outline: none;
+            line-height: 1.5;
         }
 
-        .btn-group {
+        textarea:focus {
+            background: #050b15;
+        }
+
+        .action-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 1.2rem;
+            gap: 12px;
+            justify-content: space-between;
             align-items: center;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
         }
 
         .btn {
             border: none;
-            background: #1e2a46;
-            padding: 0.7rem 1.5rem;
+            padding: 0.65rem 1.4rem;
             border-radius: 40px;
             font-weight: 500;
             font-size: 0.85rem;
             cursor: pointer;
             transition: 0.2s;
-            color: #eef3ff;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid #3a4870;
+            background: #1e2a46;
+            color: #f0f4ff;
+            border: 1px solid #334164;
         }
 
         .btn-primary {
             background: #2563eb;
-            border-color: #4791ff;
+            border-color: #3b82f6;
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
         .btn-primary:hover {
             background: #3b82f6;
-            transform: scale(1.01);
+            transform: scale(1.02);
         }
 
         .btn-secondary {
             background: #1f2a44;
-            border-color: #3b4a74;
         }
 
         .btn-secondary:hover {
             background: #2a3a60;
         }
 
-        .btn-copy {
-            background: #1a2c3f;
-            border-color: #2f5685;
-        }
-
-        .player-preview {
-            margin-top: 2rem;
-            border-radius: 1.2rem;
-            background: #0b1022;
+        .result-box {
+            background: #070c1a;
+            border-radius: 1.5rem;
+            border: 1px solid #2e3b5a;
+            margin-top: 1.8rem;
             overflow: hidden;
         }
 
-        .player-header {
-            background: #10162b;
-            padding: 0.8rem 1.2rem;
-            font-weight: 500;
-            border-bottom: 1px solid #25325a;
+        .result-header {
+            background: #0e1428;
+            padding: 0.9rem 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid #253153;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        video {
-            width: 100%;
-            max-height: 480px;
-            background: #000000;
-            outline: none;
+        .encoded-link {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            white-space: pre-wrap;
+            background: #02060c;
+            padding: 1.2rem;
+            color: #b9d0ff;
+            border-radius: 0 0 1rem 1rem;
         }
 
-        .alert {
-            background: #2c1a2e;
-            border-left: 4px solid #f97316;
+        .copy-feedback {
+            font-size: 0.7rem;
+            background: #1f2a3a;
+            padding: 4px 10px;
+            border-radius: 30px;
+        }
+
+        .meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #0a1020;
+            padding: 1rem 1.2rem;
+            border-radius: 1.2rem;
+            margin: 1.2rem 0;
+            font-size: 0.8rem;
+        }
+
+        .meta-item {
+            background: #111827;
+            padding: 0.3rem 0.9rem;
+            border-radius: 30px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .warning-note {
+            background: #1e1a2a;
+            border-left: 3px solid #f97316;
             padding: 0.8rem 1rem;
             border-radius: 1rem;
-            font-size: 0.8rem;
-            margin: 1rem 0;
-            color: #ffdead;
+            font-size: 0.75rem;
+            margin-top: 1rem;
         }
 
         @media (max-width: 680px) {
-            .content {
+            .card-body {
                 padding: 1.2rem;
-            }
-            .btn-group {
-                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-
-<div class="card">
-    <div class="header">
-        <h1>📡 JioTV M3U Parser</h1>
-        <p>Extract manifest, license key, cookie & generate direct streaming URL (clearkey + cookie injection)</p>
-    </div>
-    <div class="content">
-        <!-- Raw M3U snippet display -->
-        <div class="raw-data">
-            <div style="margin-bottom: 8px; font-weight:600;">📄 Extracted M3U entry:</div>
-            <code style="font-size:0.75rem;">
-                #EXTINF:-1 tvg-id="3278" group-title="Sports" tvg-logo="...",Star Sports 1 Telugu HD<br>
-                #KODIPROP:inputstream.adaptive.license_type=clearkey<br>
-                #KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5<br>
-                #EXTVLCOPT:http-user-agent=plaYtv/7.1.3 ...<br>
-                #EXTHTTP:{"cookie":"__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c"}<br>
-                https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?...
-            </code>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>📺 M3U → ENCODED STREAM LINK</h1>
+            <p>Paste any M3U entry (EXTINF + KODIPROP + license + cookie + MPD) → get fully percent-encoded URL (whole output encoded) + clearkey params</p>
         </div>
+        <div class="card-body">
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-label">
+                    <span>📄 M3U snippet</span>
+                    <span style="font-size:0.7rem; color:#6c86b0;">(Paste #EXTINF... lines including MPD url)</span>
+                </div>
+                <textarea id="m3uInput" rows="8" placeholder='#EXTINF:-1 tvg-id="3278" group-title="Sports" tvg-logo="https://...",Star Sports 1 Telugu HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.3 (Linux;Android 13) ygx/824.1 ExoPlayerLib/824.0
+#EXTHTTP:{"cookie":"__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c"}
+https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?#__hdnea__=...'></textarea>
+            </div>
+            <div class="action-bar">
+                <div>
+                    <button id="parseBtn" class="btn btn-primary">⚡ Generate Encoded Link</button>
+                    <button id="resetExampleBtn" class="btn btn-secondary">📋 Load Example</button>
+                </div>
+                <span style="font-size:0.7rem;">🔑 extracts keyId, key, cookie, manifest</span>
+            </div>
 
-        <!-- Parsed info summary -->
-        <div class="info-grid">
-            <div class="info-chip">🎬 Channel: <strong>Star Sports 1 Telugu HD</strong></div>
-            <div class="info-chip">🔑 Key ID: <strong>49e84b9edfd85379b90c81b7d2d3d2bf</strong></div>
-            <div class="info-chip">🗝️ Key: <strong>19c82d3ff094fa06af95820a1572ecb5</strong></div>
-            <div class="info-chip">🍪 Cookie (hdnea): <strong>__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c</strong></div>
-        </div>
+            <!-- dynamic extracted info -->
+            <div id="extractedMeta" class="meta-grid" style="display: none;"></div>
 
-        <!-- Output link as per required format: https://...mpd&keyId=...&key=...&cookie=... -->
-        <div class="output-section">
-            <div class="output-label">
-                <span>🔗 GENERATED STREAM LINK (exactly as requested)</span>
+            <!-- RESULT SECTION: FULL PERCENT-ENCODED OUTPUT -->
+            <div class="result-box" id="resultBox" style="display: none;">
+                <div class="result-header">
+                    <span>🔗 FULLY ENCODED STREAM URL (whole output % encoded)</span>
+                    <button id="copyEncodedBtn" class="btn" style="padding: 0.2rem 1rem; font-size:0.7rem;">📋 Copy Encoded</button>
+                </div>
+                <div class="encoded-link" id="encodedLinkOutput"></div>
+                <div style="padding: 0.7rem 1.2rem; font-size:0.7rem; border-top: 1px solid #253153; background:#0b0f1c;">
+                    ✅ Format: <strong>https%3A%2F%2F...mpd%3F...%26keyId%3D...%26key%3D...%26cookie%3D... (full string URL-encoded)</strong>
+                </div>
             </div>
-            <div class="stream-link-box" id="generatedLinkBox">
-                <!-- dynamic link will appear here -->
-            </div>
-            <div class="btn-group">
-                <button id="copyLinkBtn" class="btn btn-copy">📋 Copy Link</button>
-                <button id="playInBrowserBtn" class="btn btn-primary">▶ Play in HTML5 Player</button>
-                <button id="rawDecodeBtn" class="btn btn-secondary">🔍 Show raw decoded URL</button>
-            </div>
-            <div class="alert" id="infoMsg">
-                💡 The generated URL includes: MPD url + &keyId=... + &key=... + &cookie=... (URL-encoded cookie)
-            </div>
-        </div>
 
-        <!-- Video player preview -->
-        <div class="player-preview" id="playerContainer" style="display: none;">
-            <div class="player-header">
-                🎥 Stream Preview — Star Sports 1 Telugu HD (DRM protected, requires clearkey)
+            <!-- optional raw decoded preview -->
+            <div class="warning-note" id="decodedNote" style="display: none;">
+                💡 <strong>Decoded form (readable):</strong> <span id="decodedPreview"></span>
             </div>
-            <video id="videoPlayer" controls playsinline muted></video>
-            <div style="padding: 10px 12px; font-size:0.7rem; color:#6d7ea8; background:#0a0f1c;">
-                ⚠️ Note: Browser may not support Clearkey DRM natively for this specific manifest. Use external players like Kodi, VLC with inputstream.adaptive for full playback. Link below is properly formatted.
+            <div class="warning-note">
+                🧠 The output is the <strong>whole streaming URL + parameters</strong> encoded with <strong>encodeURIComponent</strong> (percent-encoding). Perfect for passing as a single query param or secure transmission.
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Hardcoded extracted values from the M3U data provided
-    const MANIFEST_URL = "https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd";
-    const KEY_ID = "49e84b9edfd85379b90c81b7d2d3d2bf";
-    const KEY = "19c82d3ff094fa06af95820a1572ecb5";
-    const RAW_COOKIE = "__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c";
+    // Helper: parse M3U text block and extract required fields
+    function parseM3UBlock(rawText) {
+        const lines = rawText.split(/\r?\n/);
+        let manifestUrl = '';
+        let licenseKeyRaw = '';    // format: keyid:key
+        let keyId = '';
+        let key = '';
+        let cookieValue = '';
+        let channelName = '';
 
-    // Encode cookie value as per required format: URL encoded cookie string.
-    // According to spec: cookie=__hdnea__%3Dst%3D1775665100~exp%3D1775686700~acl%3D%2F*~hmac%3De266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c
-    function buildFullStreamUrl() {
-        // Construct base URL with MPD
-        let url = MANIFEST_URL;
-        // Append parameters: keyId, key, cookie (URL encoded)
-        const params = new URLSearchParams();
-        params.append("keyId", KEY_ID);
-        params.append("key", KEY);
-        // cookie value must be URL-encoded fully (the whole cookie string)
-        params.append("cookie", RAW_COOKIE);
-        
-        // join: if MPD already has query params? The original MPD link in M3U had trailing #__hdnea__ but we ignore that for clean output.
-        // We'll build standard query string. Note: the MPD may have no existing '?' but for safety we check.
-        let separator = url.includes('?') ? '&' : '?';
-        // Remove any anchor/hash fragment from manifest url before appending
-        let cleanManifest = url.split('#')[0];
-        let finalUrl = `${cleanManifest}${separator}${params.toString()}`;
-        return finalUrl;
-    }
-
-    // Also generate the exact format as shown in example: 
-    // https%3A%2F%2Fjiotvpllive.cdn.jio.com%2Fbpk-tv%2FStar_Sports_1_Telugu_HD_BTS%2Foutput%2Findex.mpd&keyId=...&key=...&cookie=...
-    // But note: example shows a partially encoded format, but we produce a valid URL with proper encoding.
-    // For display we show both human readable and also raw encoded variant.
-    function getEncodedComponentExample() {
-        // Just to showcase the encoding style similar to "https%3A%2F%2F...&keyId=..."
-        let baseUrlEncoded = encodeURIComponent(MANIFEST_URL);
-        let cookieEncoded = encodeURIComponent(RAW_COOKIE);
-        return `${baseUrlEncoded}&keyId=${KEY_ID}&key=${KEY}&cookie=${cookieEncoded}`;
-    }
-
-    // display generated link
-    function displayGeneratedLink() {
-        const link = buildFullStreamUrl();
-        const linkBox = document.getElementById("generatedLinkBox");
-        if (linkBox) {
-            // Show clean clickable? We'll show as text and also as a link
-            linkBox.innerHTML = `<span style="word-break:break-all;">${escapeHtml(link)}</span><br>
-            <span style="font-size:0.7rem; color:#7f8fb2;">✅ Format: MPD_URL?keyId=...&key=...&cookie=... (cookie URL-encoded automatically)</span>`;
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            // extract EXTINF channel name
+            if (line.startsWith('#EXTINF')) {
+                const match = line.match(/,([^,]+)$/);
+                if (match) channelName = match[1].trim();
+            }
+            // KODIPROP license_key
+            if (line.startsWith('#KODIPROP:inputstream.adaptive.license_key=')) {
+                let val = line.replace('#KODIPROP:inputstream.adaptive.license_key=', '').trim();
+                licenseKeyRaw = val;
+                if (val.includes(':')) {
+                    const parts = val.split(':');
+                    keyId = parts[0].trim();
+                    key = parts[1].trim();
+                } else {
+                    // maybe hex pair
+                    keyId = val;
+                }
+            }
+            // EXTHTTP cookie JSON
+            if (line.startsWith('#EXTHTTP:')) {
+                let jsonStr = line.replace('#EXTHTTP:', '').trim();
+                try {
+                    let obj = JSON.parse(jsonStr);
+                    if (obj.cookie) cookieValue = obj.cookie;
+                } catch(e) {
+                    // fallback regex
+                    const cookieMatch = line.match(/\"cookie\"\s*:\s*\"([^\"]+)\"/);
+                    if (cookieMatch) cookieValue = cookieMatch[1];
+                }
+            }
+            // manifest URL (line that does not start with # and contains http/https and .mpd)
+            if (!line.startsWith('#') && (line.includes('.mpd') || line.includes('index.mpd')) && (line.startsWith('http://') || line.startsWith('https://'))) {
+                // clean any # fragments or extra garbage
+                let rawUrl = line.split('#')[0].split('?')[0]; // base url without hash
+                if (line.includes('.mpd')) {
+                    // preserve full url without fragments that break? we take the base part before any extra # but keep query if exists
+                    let urlBeforeHash = line.split('#')[0];
+                    manifestUrl = urlBeforeHash;
+                } else {
+                    manifestUrl = line;
+                }
+            }
         }
-        return link;
+
+        // also try to extract if license_key line has alternate pattern
+        if (!keyId || !key) {
+            for (let line of lines) {
+                if (line.includes('license_key') && (line.includes(':') && line.includes('inputstream.adaptive'))) {
+                    const regex = /license_key=([a-f0-9]+):([a-f0-9]+)/i;
+                    const match = line.match(regex);
+                    if (match) {
+                        keyId = match[1];
+                        key = match[2];
+                        break;
+                    }
+                }
+            }
+        }
+
+        // fallback: if cookie missing but there is inline __hdnea__ in MPD url? but prefer from #EXTHTTP
+        if (!cookieValue) {
+            // sometimes cookie appears as part of #EXTHTTP or inside URL param ?__hdnea__= 
+            for (let line of lines) {
+                if (line.includes('__hdnea__') && line.includes('cookie')) {
+                    const match = line.match(/__hdnea__=([^&"\s]+)/);
+                    if (match && !cookieValue) cookieValue = `__hdnea__=${match[1]}`;
+                }
+            }
+        }
+
+        return { manifestUrl, keyId, key, cookieValue, channelName, licenseKeyRaw };
     }
 
-    // Helper to escape HTML
+    // Build the FULL raw stream URL (not encoded yet) according to spec: manifest?keyId=xxx&key=xxx&cookie=xxx
+    function buildRawStreamUrl(manifest, keyId, key, cookie) {
+        if (!manifest) return '';
+        let base = manifest.split('#')[0]; // remove any trailing fragments
+        let separator = base.includes('?') ? '&' : '?';
+        let url = `${base}${separator}keyId=${encodeURIComponent(keyId)}&key=${encodeURIComponent(key)}&cookie=${encodeURIComponent(cookie)}`;
+        return url;
+    }
+
+    // FULL PERCENT-ENCODED OUTPUT: encode the whole URL (including scheme, slashes, etc)
+    function getFullyEncodedOutput(rawUrl) {
+        if (!rawUrl) return '';
+        // encodeURIComponent encodes the entire URL string (so https:// becomes https%3A%2F%2F)
+        return encodeURIComponent(rawUrl);
+    }
+
+    // render results
+    function renderResult(parsed) {
+        const { manifestUrl, keyId, key, cookieValue, channelName } = parsed;
+        if (!manifestUrl || !keyId || !key || !cookieValue) {
+            alert("Missing required data! Need manifest URL (.mpd), keyId, key (license_key), and cookie from #EXTHTTP. Check M3U format.");
+            return false;
+        }
+
+        // Build raw decoded stream URL
+        const rawStreamUrl = buildRawStreamUrl(manifestUrl, keyId, key, cookieValue);
+        // FULLY ENCODE whole output (entire string)
+        const fullyEncoded = getFullyEncodedOutput(rawStreamUrl);
+        
+        // show meta section
+        const metaDiv = document.getElementById('extractedMeta');
+        metaDiv.style.display = 'flex';
+        metaDiv.innerHTML = `
+            <div class="meta-item">📺 ${escapeHtml(channelName || 'Channel')}</div>
+            <div class="meta-item">🔑 KeyID: ${escapeHtml(keyId)}</div>
+            <div class="meta-item">🗝️ Key: ${escapeHtml(key)}</div>
+            <div class="meta-item">🍪 Cookie (trimmed): ${escapeHtml(cookieValue.length > 60 ? cookieValue.substring(0, 60) + '…' : cookieValue)}</div>
+            <div class="meta-item">📡 MPD: ${escapeHtml(manifestUrl.split('?')[0].substring(0, 70))}...</div>
+        `;
+        
+        // show result box
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'block';
+        const encodedOutputDiv = document.getElementById('encodedLinkOutput');
+        encodedOutputDiv.innerHTML = `<span style="word-break:break-all; font-family:monospace;">${escapeHtml(fullyEncoded)}</span>`;
+        
+        // show decoded preview
+        const decodedNote = document.getElementById('decodedNote');
+        const decodedSpan = document.getElementById('decodedPreview');
+        decodedNote.style.display = 'block';
+        let shortPreview = rawStreamUrl.length > 150 ? rawStreamUrl.substring(0, 150) + '...' : rawStreamUrl;
+        decodedSpan.innerHTML = escapeHtml(shortPreview);
+        
+        // store encoded for copy
+        window.__lastEncoded = fullyEncoded;
+        window.__lastRaw = rawStreamUrl;
+        return true;
+    }
+
+    // main parse & generate from textarea
+    function processM3U() {
+        const rawText = document.getElementById('m3uInput').value;
+        if (!rawText.trim()) {
+            alert("Please paste M3U data containing EXTINF, license_key, cookie and MPD url.");
+            return;
+        }
+        const parsed = parseM3UBlock(rawText);
+        if (!parsed.manifestUrl) {
+            alert("Could not find MPD manifest URL (https://...index.mpd). Make sure the M3U contains a valid stream URL.");
+            return;
+        }
+        if (!parsed.keyId || !parsed.key) {
+            alert("Missing license_key (keyId:key). Example: #KODIPROP:inputstream.adaptive.license_key=49e84b9e...:19c82d3f...");
+            return;
+        }
+        if (!parsed.cookieValue) {
+            alert("Cookie not found! Need #EXTHTTP:{\"cookie\":\"__hdnea__=...\"} line.");
+            return;
+        }
+        renderResult(parsed);
+    }
+    
+    // load example exactly from the user requirement (original data)
+    function loadExample() {
+        const example = `#EXTINF:-1 tvg-id="3278" group-title="Sports" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu_HD.png",Star Sports 1 Telugu HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5
+#EXTVLCOPT:http-user-agent=plaYtv/7.1.3 (Linux;Android 13) ygx/824.1 ExoPlayerLib/824.0
+#EXTHTTP:{"cookie":"__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c"}
+https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?#__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c`;
+        document.getElementById('m3uInput').value = example;
+        // auto process after example load? optional
+        processM3U();
+    }
+    
+    // copy fully encoded string
+    async function copyEncoded() {
+        if (!window.__lastEncoded) {
+            alert("No encoded link generated yet. Click 'Generate Encoded Link' first.");
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(window.__lastEncoded);
+            const copyBtn = document.getElementById('copyEncodedBtn');
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = '✅ Copied!';
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+            }, 2000);
+        } catch (err) {
+            alert("Manual copy failed: " + err);
+        }
+    }
+    
+    // Helper escape HTML
     function escapeHtml(str) {
+        if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
-
-    // Copy link to clipboard
-    async function copyStreamLink() {
-        const fullUrl = buildFullStreamUrl();
-        try {
-            await navigator.clipboard.writeText(fullUrl);
-            const msgDiv = document.getElementById("infoMsg");
-            if (msgDiv) {
-                msgDiv.innerHTML = "✅ Copied to clipboard! Full streaming URL with keys & cookie is ready.";
-                setTimeout(() => {
-                    msgDiv.innerHTML = "💡 The generated URL includes: MPD url + &keyId=... + &key=... + &cookie=... (URL-encoded cookie)";
-                }, 3000);
-            }
-        } catch (err) {
-            alert("Copy failed, manually select text.");
-        }
-    }
-
-    // Show raw encoded format similar to request (percent-encoded URL)
-    function showRawEncoded() {
-        const encodedForm = getEncodedComponentExample();
-        alert("Encoded representation (similar to requested format):\n\n" + encodedForm + "\n\n(Full stream URL with proper params is shown in main box)");
-    }
-
-    // HTML5 player try: attempt to play video with clearkey? Most browsers require DRM setup.
-    // However, we attach source with proper cookie via 'withCredentials' or by setting cookies on document? 
-    // For MPD with cookie authentication, we need to set document.cookie or use a custom fetch/ MediaSource?
-    // Because video element cannot send custom cookie header unless the cookie is set for domain jiotvpllive.cdn.jio.com.
-    // So we set document.cookie for that domain? Domain is .jio.com? We attempt to set cookie.
-    // Also clearkey license handling: we could try to attach MediaKeys but it's complex. For demo, we attempt to load MPD with cookie manually.
-    // Better to show that external players recommended. But we try to play using video.js? Instead we just set source and attempt.
-    function playInBrowser() {
-        const playerContainer = document.getElementById("playerContainer");
-        const videoEl = document.getElementById("videoPlayer");
-        if (!videoEl) return;
+    
+    // Additional: also support optional custom parsing of license if present in different form
+    document.addEventListener('DOMContentLoaded', () => {
+        const parseBtn = document.getElementById('parseBtn');
+        const resetBtn = document.getElementById('resetExampleBtn');
+        const copyEncodedBtn = document.getElementById('copyEncodedBtn');
+        if (parseBtn) parseBtn.addEventListener('click', processM3U);
+        if (resetBtn) resetBtn.addEventListener('click', loadExample);
+        if (copyEncodedBtn) copyEncodedBtn.addEventListener('click', copyEncoded);
         
-        const streamUrl = buildFullStreamUrl();
-        // Important: To pass the cookie to the MPD request, we need to set the cookie for the CDN domain.
-        // The cookie __hdnea__ must be sent with any request to *.cdn.jio.com. We'll set document.cookie with proper domain/path.
-        // Domain might be .jio.com or specific. We'll try to set the cookie with path=/
-        try {
-            // Extract domain: jiotvpllive.cdn.jio.com -> we can set cookie for ".cdn.jio.com" or ".jio.com"
-            // For better compatibility we set for current domain? The request goes to jiotvpllive.cdn.jio.com, we must set cookie with Domain=.cdn.jio.com
-            // However due to same-origin restrictions, setting cookie for other domain via JS is not allowed unless the page is served from that domain.
-            // Since this is a local HTML, the cookie won't be sent to external CDN unless we use a proxy. So we warn.
-            // But we still attempt to set cookie for the exact domain path via hack? Not possible due to security. We'll show error message.
-            // Instead we use a custom fetch with credentials but video src doesn't allow that. So we provide info.
-            const warningMsg = document.getElementById("infoMsg");
-            if (warningMsg) {
-                warningMsg.innerHTML = "⚠️ Browser direct playback may fail due to cross-origin cookie restrictions. Use VLC, Kodi or external player with the generated link. Trying to load anyway...";
-                setTimeout(() => {
-                    warningMsg.innerHTML = "💡 The generated URL includes: MPD url + &keyId=... + &key=... + &cookie=... (URL-encoded cookie)";
-                }, 5000);
-            }
-            // Still set source: some modern browsers might forward cookie if we set it for the exact domain but restricted.
-            // We'll also try to include the cookie in the query params (already appended &cookie=...), server might also accept cookie param.
-            // So the appended cookie param may help.
-            videoEl.src = streamUrl;
-            playerContainer.style.display = "block";
-            videoEl.load();
-            videoEl.play().catch(e => {
-                console.warn("Playback error:", e);
-                const msgDiv = document.getElementById("infoMsg");
-                if (msgDiv) {
-                    msgDiv.innerHTML = "⚠️ Playback failed: " + (e.message || "DRM or CORS issue") + ". Use external player with the generated link (Kodi/VLC + inputstream).";
-                }
-            });
-        } catch (err) {
-            alert("Error loading stream: " + err.message);
-        }
-    }
-
-    // Initialize page: display generated link, attach event handlers
-    document.addEventListener("DOMContentLoaded", () => {
-        displayGeneratedLink();
-        
-        const copyBtn = document.getElementById("copyLinkBtn");
-        const playBtn = document.getElementById("playInBrowserBtn");
-        const rawBtn = document.getElementById("rawDecodeBtn");
-        
-        if (copyBtn) copyBtn.addEventListener("click", copyStreamLink);
-        if (playBtn) playBtn.addEventListener("click", playInBrowser);
-        if (rawBtn) rawBtn.addEventListener("click", showRawEncoded);
-        
-        // Additional: Log the exact output format to console for dev verification
-        const finalUrl = buildFullStreamUrl();
-        console.log("Generated streaming URL:\n", finalUrl);
-        // Also output encoded format exactly like the example:
-        const encodedExample = getEncodedComponentExample();
-        console.log("Encoded representation as requested:\n", encodedExample);
-        
-        // Optionally, set a helper to show both forms
-        const linkBox = document.getElementById("generatedLinkBox");
-        if (linkBox) {
-            // Add small additional info copy for encoded representation
-            const extraDiv = document.createElement("div");
-            extraDiv.style.marginTop = "12px";
-            extraDiv.style.fontSize = "0.7rem";
-            extraDiv.style.borderTop = "1px solid #253153";
-            extraDiv.style.paddingTop = "8px";
-            extraDiv.innerHTML = `<span>🔐 Encoded format (like request sample): </span><code style="background:#0f1422; padding:2px 6px; border-radius:8px;">${escapeHtml(encodedExample.substring(0, 120))}...</code>`;
-            linkBox.appendChild(extraDiv);
-        }
+        // preload example on first load? show initial state but not auto process until click, but we set placeholder example
+        loadExample();  // loads example & auto-generates result (user sees output immediately)
     });
 </script>
 </body>
