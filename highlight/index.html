@@ -2,101 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Plyr + HLS.js - Advanced Video Player</title>
-
-    <!-- Plyr CSS (Core styles) -->
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>JW Player - HLS Stream Player (M3U8)</title>
+    
+    <!-- JW Player 8 SDK (latest stable from CDN) -->
+    <!-- Includes HLS.js polyfill for cross-browser HLS streaming -->
+    <script src="https://cdn.jwplayer.com/libraries/6H9pNy3b.js"></script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            background: linear-gradient(145deg, #0a0f1e 0%, #0a0f1e 100%);
+            background: linear-gradient(135deg, #0b1120 0%, #111827 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            padding: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 24px;
         }
-
-        .player-container {
+        
+        .player-card {
             max-width: 1280px;
             width: 100%;
             background: #000000;
-            border-radius: 28px;
+            border-radius: 32px;
             overflow: hidden;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
             transition: all 0.2s ease;
         }
-
-        .video-wrapper {
+        
+        .jw-container {
             position: relative;
             background: #000;
+            aspect-ratio: 16 / 9;
+            width: 100%;
         }
-
-        /* plyr custom skin overrides for better dark theme */
-        .plyr--video {
-            border-radius: 0;
+        
+        /* The JW Player element fills container */
+        #jwplayer-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
-
-        .plyr__control--overlaid {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .info-bar {
-            background: rgba(12, 18, 28, 0.95);
-            backdrop-filter: blur(8px);
-            padding: 0.9rem 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        
+        .info-footer {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 1rem 1.5rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 12px;
             font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
             color: #e2e8f0;
         }
-
-        .stream-badge {
-            background: #ef4444;
-            padding: 4px 12px;
-            border-radius: 40px;
+        
+        .badge {
+            background: #dc2626;
+            padding: 5px 12px;
+            border-radius: 100px;
             font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
-            color: white;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-
-        .tech-stack {
+        
+        .tech-details {
             display: flex;
-            gap: 16px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            opacity: 0.7;
+            gap: 20px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.7rem;
+            opacity: 0.75;
         }
-
-        .note {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px 14px;
+        
+        .warning-note {
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 24px;
+            padding: 6px 14px;
             font-size: 0.7rem;
             color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        @media (max-width: 640px) {
+        
+        .warning-note i {
+            font-style: normal;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 700px) {
             body {
-                padding: 0.75rem;
+                padding: 12px;
             }
-            .info-bar {
+            .info-footer {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -105,278 +115,236 @@
 </head>
 <body>
 
-<div class="player-container">
-    <div class="video-wrapper">
-        <!-- 
-            Plyr video element:
-            - 'crossorigin' is essential for proper CORS handling and token/cookie forwarding.
-            - 'playsinline' prevents mobile fullscreen auto-behavior.
-            - Poster can be added if needed.
-        -->
-        <video id="plyr-hls-player" controls playsinline crossorigin="anonymous" poster="https://assets.codepen.io/32795/fallback-poster.jpg">
-            <!-- Captions can be added here later if needed -->
-            <track kind="captions" label="No captions" disabled>
-        </video>
+<div class="player-card">
+    <div class="jw-container">
+        <!-- JW Player will be injected inside this div -->
+        <div id="jwplayer-container"></div>
     </div>
-    <div class="info-bar">
-        <div class="stream-badge">LIVE STREAM · HLS</div>
-        <div class="tech-stack">
-            <span>🎬 Plyr 3.7.8</span>
-            <span>⚡ hls.js</span>
-            <span>📡 .m3u8 adaptive</span>
+    <div class="info-footer">
+        <div class="badge">🔴 HLS STREAM · M3U8</div>
+        <div class="tech-details">
+            <span>🎥 JW Player 8</span>
+            <span>⚡ Adaptive Bitrate</span>
+            <span>📡 Quality selector</span>
         </div>
-        <div class="note">
-            ⚡ Supports quality selector & custom headers
+        <div class="warning-note">
+            <i>⚠️</i> Requires valid stream token / cookies if access restricted
         </div>
     </div>
 </div>
 
-<!-- 1. Plyr JS -->
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-<!-- 2. Hls.js (latest stable) -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <script>
     (function() {
-        // ------------------------------------------------------------------
-        // 🔥 SET YOUR M3U8 URL HERE (replace with your actual stream)
-        // ------------------------------------------------------------------
-        const M3U8_SOURCE = "https://vod01.akt.hotstar-cdn.net/videos/cricket/inallow-ipl-2026-1540066073/1540066074/b8fd04046ec040d59e857dfaa40d30d4/index_7.m3u8";
+        // --------------------------------------------------------------
+        // 🔥 THE M3U8 URL (Hotstar / IPL 2026 stream example)
+        // --------------------------------------------------------------
+        const STREAM_URL = "https://vod01.akt.hotstar-cdn.net/videos/cricket/inallow-ipl-2026-1540066073/1540066074/b8fd04046ec040d59e857dfaa40d30d4/index_7.m3u8";
         
-        // ------------------------------------------------------------------
-        // OPTIONAL: If your stream requires authentication tokens / headers
-        // Example: some streams need 'Referer' or 'Authorization' header.
-        // WARNING: Custom headers require the server to allow CORS.
-        // For Hotstar-like tokens, you'll need valid session cookies.
-        // ------------------------------------------------------------------
+        // --------------------------------------------------------------
+        // ⚙️ OPTIONAL: If the stream requires specific HTTP headers (e.g., Referer, Origin, Authorization)
+        // JW Player supports token-based authentication via 'hlsjsconfig' or custom request headers.
+        // Note: Most DRM / token-protected streams (Hotstar) require a valid session cookie.
+        // The headers below are examples; you may need to extract actual session from browser.
+        // --------------------------------------------------------------
         const CUSTOM_HEADERS = {
-            // "Authorization": "Bearer YOUR_TOKEN_HERE",
             // "Referer": "https://www.hotstar.com/",
-            // "Origin": "https://www.hotstar.com"
+            // "Origin": "https://www.hotstar.com",
+            // "Authorization": "Bearer YOUR_TOKEN_HERE"
         };
-
-        // DOM elements
-        const videoElement = document.querySelector('#plyr-hls-player');
-        if (!videoElement) {
-            console.error("Video element not found!");
-            return;
+        
+        // Helper: If custom headers are needed, we inject them into hls.js config (used by JW Player on non-Safari)
+        function getHlsJsConfig() {
+            if (Object.keys(CUSTOM_HEADERS).length === 0) {
+                return {}; // default config
+            }
+            // hls.js configuration to attach custom headers on each fragment request
+            return {
+                xhrSetup: function(xhr, url) {
+                    for (const [key, value] of Object.entries(CUSTOM_HEADERS)) {
+                        xhr.setRequestHeader(key, value);
+                    }
+                }
+            };
         }
-
-        let player = null;      // Plyr instance
-        let hls = null;         // Hls.js instance
-
-        // Helper: update plyr quality options dynamically when HLS manifest is parsed
-        function setupQualitySelector(currentHls, plyrInstance) {
-            if (!currentHls || !plyrInstance) return;
-
-            // Wait for manifest to be fully parsed to get available quality levels
-            currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
-                const levels = currentHls.levels;
-                if (!levels || levels.length === 0) {
-                    console.warn("No quality levels found in manifest.");
-                    return;
-                }
-
-                // Extract unique heights (e.g., 360, 480, 720, 1080)
-                const qualityOptions = levels.map(level => level.height);
-                // Remove duplicates just in case
-                const uniqueQualities = [...new Set(qualityOptions)];
-                // Sort descending (1080p first looks nice)
-                uniqueQualities.sort((a, b) => b - a);
-
-                // Add 0 for "Auto" mode (adaptive bitrate)
-                const finalQualities = [0, ...uniqueQualities];
+        
+        // Wait for DOM and JW Player API to be ready
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get the container element
+            const playerElement = document.getElementById("jwplayer-container");
+            if (!playerElement) {
+                console.error("JW Player container not found");
+                return;
+            }
+            
+            // Setup JW Player configuration
+            // For HLS streams, JW Player uses native HLS on Safari + hls.js on other browsers
+            const playerConfig = {
+                // The div ID or element reference
+                container: playerElement,
+                // Stream file
+                file: STREAM_URL,
+                // Tell JW Player it's an HLS stream (explicit type)
+                type: "hls",
+                // Primary rendering: html5 ensures best HLS support
+                primary: "html5",
+                // Autostart can be set to false by default; user can click play
+                autostart: false,
+                // Mute start is not required, but we let user control volume
+                mute: false,
+                // Show quality selection button if multiple renditions exist in M3U8
+                // JW Player automatically detects bitrates and adds quality menu
+                // Force quality selection UI to be visible
+                allowFullscreen: true,
+                // Enable controls
+                controls: true,
+                // Provide a poster frame (optional, can be removed)
+                // image: "https://assets.codepen.io/32795/hotstar-poster-placeholder.jpg",
+                // Preload metadata for faster startup
+                preload: "auto",
+                // To handle potential token expiration or CORS issues, we can set up provider options
+                // For HLS, JW Player uses its internal HLS provider; we can forward custom hls.js config
+                hlsjsConfig: getHlsJsConfig(),
+                // If the stream requires advanced CORS with credentials (cookies), we enable:
+                // This helps to send cookies along with segment requests.
+                // Important: Hotstar tokens usually rely on cookies. This must be allowed by CORS.
+                withCredentials: true,   // Sends cookies & authorization headers cross-origin if CORS allows
                 
-                console.log(`🎚️ Available qualities: ${uniqueQualities.join(', ')}p | Auto mode enabled`);
-
-                // Define the new quality option object for Plyr
-                const qualityConfig = {
-                    default: 0,     // 0 = auto (adaptive)
-                    options: finalQualities,
-                    forced: true,   // Replace native quality menu with custom HLS control
-                    onChange: (newQuality) => {
-                        if (!currentHls) return;
-                        if (newQuality === 0) {
-                            // Enable auto quality (ABR)
-                            currentHls.currentLevel = -1;
-                            console.log("🔄 Quality switched to: AUTO (Adaptive)");
-                        } else {
-                            // Find level index matching the selected height
-                            const levelIndex = currentHls.levels.findIndex(level => level.height === newQuality);
-                            if (levelIndex !== -1) {
-                                currentHls.currentLevel = levelIndex;
-                                console.log(`🎛️ Quality switched to: ${newQuality}p`);
-                            } else {
-                                console.warn(`Quality ${newQuality}p not available`);
-                            }
-                        }
-                    }
-                };
-
-                // Extend Plyr options with quality selector and i18n for "Auto" label
-                const plyrOptions = {
-                    quality: qualityConfig,
-                    i18n: {
-                        qualityLabel: {
-                            0: 'Auto',
-                        },
-                        restart: 'Restart',
-                        rewind: 'Rewind {seektime}s',
-                        play: 'Play',
-                        pause: 'Pause',
-                        fastForward: 'Forward {seektime}s',
-                        seek: 'Seek',
-                        seekLabel: '{currentTime} of {duration}',
-                        played: 'Played',
-                        buffered: 'Buffered',
-                        currentTime: 'Current time',
-                        duration: 'Duration',
-                        volume: 'Volume',
-                        mute: 'Mute',
-                        unmute: 'Unmute',
-                        enableCaptions: 'Enable captions',
-                        disableCaptions: 'Disable captions',
-                        download: 'Download',
-                        enterFullscreen: 'Enter fullscreen',
-                        exitFullscreen: 'Exit fullscreen',
-                        frameTitle: 'Player for {title}',
-                        captions: 'Captions',
-                        settings: 'Settings',
-                        menuBack: 'Go back to previous menu',
-                        speed: 'Speed',
-                        normal: 'Normal',
-                        quality: 'Quality',
-                        loop: 'Loop'
-                    }
-                };
-
-                // Re-configure Plyr with new options (must destroy old instance first)
-                if (plyrInstance && typeof plyrInstance.destroy === 'function') {
-                    plyrInstance.destroy();
-                }
-                // Create fresh Plyr with quality selector
-                const newPlayer = new Plyr(videoElement, plyrOptions);
-                player = newPlayer;
-
-                // Sync the HLS instance back to global
-                window.hlsInstance = currentHls;
-
-                // Optional: update quality badge when level changes
-                currentHls.on(Hls.Events.LEVEL_SWITCHED, function(evt, data) {
-                    const level = currentHls.levels[data.level];
-                    if (level && player && player.elements && player.elements.container) {
-                        const autoActive = (currentHls.currentLevel === -1);
-                        if (!autoActive && level.height) {
-                            console.log(`📺 Current quality: ${level.height}p`);
-                        } else if (autoActive) {
-                            console.log(`📺 Current quality: AUTO (${level ? level.height + 'p' : 'unknown'})`);
-                        }
-                    }
-                });
+                // Optionally configure the quality label behavior
+                // JW Player automatically lists renditions in settings gear.
+                // Enable "auto" quality option.
+                qualityLabels: {
+                    auto: "Auto (Adaptive)",
+                    low: "Low",
+                    medium: "Medium",
+                    high: "High"
+                },
+                
+                // To handle errors gracefully (like 403 Forbidden)
+                // Show custom error message if stream can't load.
+                // Note: JW Player will display generic error; we can capture and enhance.
+            };
+            
+            // Initialize JW Player instance
+            let jwplayerInstance = jwplayer("jwplayer-container").setup(playerConfig);
+            
+            // Event listeners for debugging / user feedback
+            jwplayerInstance.on("ready", function() {
+                console.log("✅ JW Player is ready, attempting to load HLS stream.");
+                // Attempt to play? Usually user clicks play. But we can check autostart false.
             });
-        }
-
-        // Initialize HLS playback + Plyr
-        function initHlsPlayer() {
-            // Check if HLS is natively supported by the browser (Safari supports HLS natively)
-            if (Hls.isSupported()) {
-                // ---- Using hls.js for full control & quality selector ----
-                hls = new Hls({
-                    enableWorker: true,        // Use web workers for better performance
-                    lowLatencyMode: true,      // Reduce latency for live streams
-                    maxBufferLength: 30,       // Balanced buffering
-                    maxMaxBufferLength: 60,
-                    startPosition: -1,         // Start from live edge or beginning
-                    debug: false,              // Set to true for verbose logs
-                });
-
-                // If custom headers are required (e.g., authorization token)
-                if (Object.keys(CUSTOM_HEADERS).length > 0) {
-                    // Override xhr setup to inject custom headers
-                    hls.config.xhrSetup = function(xhr, url) {
-                        for (const [key, value] of Object.entries(CUSTOM_HEADERS)) {
-                            xhr.setRequestHeader(key, value);
-                        }
-                    };
+            
+            jwplayerInstance.on("error", function(error) {
+                console.error("❌ JW Player error:", error);
+                // Provide more descriptive feedback based on error code
+                let errorMessage = "Unable to play the stream. ";
+                if (error.message) errorMessage += error.message;
+                if (error.code === 100011) { // HLS load error
+                    errorMessage = "Failed to load M3U8 manifest. The stream may require authentication, a valid session, or geographic permissions. (403 / token missing)";
+                } else if (error.code === 100002 || error.code === 100003) {
+                    errorMessage = "Network error or CORS block. The server might be rejecting cross-origin requests. Check if custom headers or cookies are needed.";
+                } else if (error.code === 100005) {
+                    errorMessage = "HLS parsing error – the stream URL might be expired or malformed.";
                 }
-
-                // Bind HLS to video element
-                hls.attachMedia(videoElement);
-                
-                // Load the m3u8 stream
-                hls.loadSource(M3U8_SOURCE);
-                
-                // When HLS fails, show error
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        switch(data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.error("Fatal network error — trying to recover");
-                                hls.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.error("Fatal media error — attempting recovery");
-                                hls.recoverMediaError();
-                                break;
-                            default:
-                                console.error("Fatal error — cannot recover", data);
-                                // You can optionally destroy and show fallback
-                                break;
-                        }
-                    }
-                });
-
-                // Once manifest is parsed, setup quality selector and initialize Plyr
-                hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
-                    console.log("✅ HLS manifest parsed, initializing Plyr with quality selector.");
-                    // Create temporary Plyr instance without quality (we'll replace it inside setupQualitySelector)
-                    const tempPlayer = new Plyr(videoElement, {});
-                    setupQualitySelector(hls, tempPlayer);
-                });
-
-                // Make hls globally accessible for debugging (optional)
-                window.hls = hls;
-            } 
-            else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-                // Fallback for Safari (native HLS support)
-                console.log("📱 Using native HLS playback (Safari). Quality selector limited.");
-                videoElement.src = M3U8_SOURCE;
-                // For Safari, we still initialize Plyr without custom quality (native controls fallback)
-                player = new Plyr(videoElement, {
-                    // Native HLS doesn't support quality switching via hls.js, but basic plyr works
-                    controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']
-                });
-            } 
-            else {
-                console.error("❌ HLS is not supported in this browser.");
-                videoElement.innerHTML = '<source src="fallback.mp4" type="video/mp4">Your browser does not support HLS streaming.';
+                // Show a friendly overlay message in the player (optional)
+                // jwplayerInstance.addButton? not needed. Just log + we can display on container
+                const errorDiv = document.createElement("div");
+                errorDiv.style.position = "absolute";
+                errorDiv.style.bottom = "60px";
+                errorDiv.style.left = "20px";
+                errorDiv.style.right = "20px";
+                errorDiv.style.backgroundColor = "rgba(0,0,0,0.75)";
+                errorDiv.style.color = "#ffb3b3";
+                errorDiv.style.padding = "12px 18px";
+                errorDiv.style.borderRadius = "12px";
+                errorDiv.style.fontSize = "13px";
+                errorDiv.style.fontFamily = "monospace";
+                errorDiv.style.zIndex = "100";
+                errorDiv.style.backdropFilter = "blur(8px)";
+                errorDiv.style.borderLeft = "3px solid #ff4d4d";
+                errorDiv.innerText = `⚠️ ${errorMessage} \n\nPossible reasons:\n• Expired/token-protected link\n• Missing Hotstar authentication\n• Geo-restriction\n\nTry playing through official Hotstar app.`;
+                const container = document.querySelector(".jw-container");
+                if (container && !container.querySelector(".custom-error-overlay")) {
+                    errorDiv.classList.add("custom-error-overlay");
+                    container.style.position = "relative";
+                    container.appendChild(errorDiv);
+                    setTimeout(() => {
+                        if (errorDiv.parentNode) errorDiv.style.opacity = "0.8";
+                    }, 100);
+                }
+            });
+            
+            jwplayerInstance.on("levelsChanged", function(event) {
+                console.log("🎚️ Available quality levels (renditions):", event.levels);
+                // JW Player automatically adds gear icon -> quality menu
+                if (event.levels && event.levels.length > 0) {
+                    const qualityCount = event.levels.length;
+                    console.log(`📊 Detected ${qualityCount} quality levels. User can change via settings.`);
+                }
+            });
+            
+            jwplayerInstance.on("levelChanged", function(event) {
+                if (event.currentLevel) {
+                    const height = event.currentLevel.height;
+                    console.log(`🔄 Switched to quality: ${height ? height + 'p' : 'adaptive'}`);
+                }
+            });
+            
+            jwplayerInstance.on("setupError", function(err) {
+                console.warn("JW Player setup error:", err);
+            });
+            
+            // Additional helper: Because Hotstar links often return 403 due to missing Referer / Origin
+            // Note: JW Player's hlsjsConfig with custom xhrSetup works only on browsers where hls.js is used (non-Safari)
+            // For Safari native HLS, we cannot inject headers easily. Provide notice to user.
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (isSafari) {
+                console.warn("Safari uses native HLS, custom headers via hls.js are NOT applied. If stream requires specific headers, playback may fail.");
+                // Optionally display subtle reminder in footer
+                const footerNote = document.querySelector(".warning-note");
+                if (footerNote) {
+                    footerNote.innerHTML = "<i>🍎</i> Safari: native HLS – some auth headers may be omitted. If 403 persists, use Chrome/Edge with proper cookies.";
+                }
+            } else {
+                console.log("Using hls.js via JW Player – custom headers (if any) will be applied to fragment requests.");
             }
-        }
-
-        // Cleanup function to avoid memory leaks
-        function destroyPlayerAndHls() {
-            if (player && typeof player.destroy === 'function') {
-                player.destroy();
-                player = null;
-            }
-            if (hls && typeof hls.destroy === 'function') {
-                hls.destroy();
-                hls = null;
-            }
-        }
-
-        // Start everything when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            destroyPlayerAndHls(); // Clean any previous instances
-            initHlsPlayer();
-        });
-
-        // Optional: handle page unload to destroy resources
-        window.addEventListener('beforeunload', () => {
-            if (player) player.destroy();
-            if (hls) hls.destroy();
+            
+            // Handle visibility / cleanup on page unload (optional)
+            window.addEventListener("beforeunload", function() {
+                if (jwplayerInstance && typeof jwplayerInstance.remove === "function") {
+                    jwplayerInstance.remove();
+                }
+            });
+            
+            // Expose instance for debugging (optional)
+            window.jwPlayerDebug = jwplayerInstance;
         });
     })();
 </script>
+
+<!-- 
+    Additional note: 
+    The provided M3U8 URL is from Hotstar CDN and almost certainly requires:
+    1. A valid 'session token' or 'jwt' cookie tied to an active Hotstar subscription.
+    2. The 'Referer' header set to 'https://www.hotstar.com'.
+    3. The correct 'Origin' and possibly 'x-api-key' headers.
+    
+    To make this work with JW Player:
+    - You must be logged into Hotstar in the same browser (shared cookies).
+    - The domain serving this HTML must have access to those cookies (same domain or properly configured CORS).
+    - The stream token in the URL might expire after a few minutes.
+    
+    For production use, you should extract a fresh M3U8 URL from Hotstar's API while authenticated.
+    
+    JW Player with custom headers example:
+    Uncomment CUSTOM_HEADERS object above and set your token / referrer.
+    Example:
+        const CUSTOM_HEADERS = {
+            "Referer": "https://www.hotstar.com/",
+            "Origin": "https://www.hotstar.com"
+        };
+    
+    Additionally, you can enable 'withCredentials: true' as set above to pass cookies.
+    If the server requires an Authorization Bearer token, add it to CUSTOM_HEADERS.
+-->
 </body>
 </html>
