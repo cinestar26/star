@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Match Pulse: Highlights vs Team | Player Zone & Analysis</title>
+    <title>IPL Highlights: RCB vs CSK | Player Impact & Match Analysis</title>
     <style>
         * {
             margin: 0;
@@ -12,11 +12,11 @@
         }
 
         body {
-            background: #f4f6fa;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0a0f1e;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
             line-height: 1.5;
-            color: #1e2a3e;
-            padding: 20px 16px;
+            color: #eef2ff;
+            padding: 24px 20px;
         }
 
         /* main container */
@@ -24,191 +24,229 @@
             max-width: 1400px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 32px;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            border-radius: 40px;
+            box-shadow: 0 30px 45px -12px rgba(0,0,0,0.35);
             overflow: hidden;
-            padding: 24px 24px 48px 24px;
+            padding: 28px 28px 48px 28px;
+            color: #1e293b;
         }
 
-        /* LAYOUT: FLEX for desktop (sidebars) */
+        /* LAYOUT: FLEX for desktop sidebars */
         .post-layout {
             display: flex;
             gap: 32px;
             flex-wrap: wrap;
         }
 
-        /* MAIN CONTENT AREA (center column) */
+        /* MAIN CONTENT (center) */
         .content-main {
             flex: 1;
             min-width: 260px;
         }
 
-        /* LEFT & RIGHT SIDEBARS — only visible on laptop/desktop */
+        /* SIDEBARS: hidden on mobile, visible on laptop/desktop */
         .sidebar-left, .sidebar-right {
             width: 280px;
             flex-shrink: 0;
-            display: none; /* hidden on mobile by default */
+            display: none;
         }
 
-        /* AD containers inside sidebars */
+        /* sidebar ad cards */
         .sidebar-ad {
-            background: linear-gradient(145deg, #f0f3f9, #e9eef4);
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-radius: 28px;
             padding: 20px 16px;
             text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 6px 12px -8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 12px 18px -10px rgba(0,0,0,0.1);
             margin-bottom: 32px;
-            transition: all 0.2s;
+            transition: 0.2s;
         }
         .sidebar-ad .ad-label {
             font-size: 11px;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            color: #5b6e8c;
-            margin-bottom: 14px;
-            font-weight: 500;
+            color: #f97316;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
         .sidebar-ad .ad-content {
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 28px 12px;
-            border: 1px dashed #b9c4d4;
-            color: #2c3e66;
+            border: 1px solid #ffe2c6;
+            color: #1e293b;
             font-weight: 600;
+            background: #fffaf5;
         }
-        .ad-placeholder {
-            background: #fef9e3;
-            background-image: repeating-linear-gradient(45deg, #ffeedd22 0px, #ffeedd22 25px, #fff3e0 25px, #fff3e0 50px);
+        .ipl-ad-badge {
+            background: linear-gradient(90deg, #ff6a00, #ee3a2b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
         }
 
         /* BANNER ADS (between paragraphs) */
         .banner-ad {
-            background: #fff7eb;
-            border-radius: 24px;
-            padding: 18px 20px;
-            margin: 28px 0;
+            background: linear-gradient(105deg, #fff9f0, #fff4e6);
+            border-radius: 28px;
+            padding: 20px 20px;
+            margin: 32px 0;
             text-align: center;
-            border-left: 6px solid #ff8c42;
-            box-shadow: 0 5px 12px rgba(0,0,0,0.03);
+            border-left: 8px solid #f97316;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
             transition: all 0.2s;
         }
         .banner-ad .ad-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: #c97e2c;
+            font-size: 11px;
+            font-weight: 800;
+            color: #c2410c;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         .banner-ad .ad-message {
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 1.05rem;
+            font-weight: 700;
             margin-top: 8px;
-            color: #3b2a1f;
+            color: #2c2b26;
+        }
+        .banner-ad .small-cta {
+            font-size: 12px;
+            margin-top: 8px;
+            color: #f97316;
         }
 
-        /* MATCH HEADLINE */
-        .match-headline {
-            margin-bottom: 28px;
-            border-bottom: 3px solid #ff6b35;
-            display: inline-block;
-            padding-bottom: 6px;
+        /* HEADER + MATCH HIGHLIGHTS TITLE */
+        .match-header {
+            margin-bottom: 20px;
         }
         .match-headline h1 {
-            font-size: 1.9rem;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #1f2f47, #2b3b5c);
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #0f172a, #ea580c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            display: inline-block;
+            border-left: 5px solid #f97316;
+            padding-left: 18px;
+        }
+        .vs-team-highlight {
+            background: linear-gradient(145deg, #f97316, #dc2626);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
         }
-        .vs-team-highlight {
-            color: #e25822;
+
+        /* IFRAME VIDEO WRAPPER (responsive) */
+        .video-wrapper {
+            margin: 28px 0 32px 0;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 32px -12px rgba(0, 0, 0, 0.25);
+            background: #000;
+            aspect-ratio: 16 / 9;
+        }
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
         }
 
-        /* PLAYER AREA (responsive grid) */
+        /* PLAYER AREA (IPL special: impact players) */
         .player-area {
-            background: #0f172a;
-            background: linear-gradient(115deg, #0b1426 0%, #141e38 100%);
-            border-radius: 36px;
-            padding: 28px 24px;
-            margin: 32px 0 40px 0;
+            background: linear-gradient(115deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 40px;
+            padding: 28px 28px;
+            margin: 20px 0 42px 0;
             color: white;
-            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 28px -10px rgba(0,0,0,0.5);
+            border: 1px solid rgba(249,115,22,0.3);
         }
         .player-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 20px;
-            padding-left: 6px;
-            border-left: 6px solid #ff9f4a;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 6px solid #f97316;
+            padding-left: 18px;
+        }
+        .player-title span {
+            background: #f97316;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 60px;
         }
         .player-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
+            gap: 28px;
         }
         .player-card {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(2px);
-            border-radius: 28px;
-            padding: 20px 16px;
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(4px);
+            border-radius: 32px;
+            padding: 20px 18px;
             text-align: center;
-            transition: transform 0.2s ease, background 0.2s;
-            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.25s ease;
+            border: 1px solid rgba(249,115,22,0.3);
         }
         .player-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.14);
+            transform: translateY(-6px);
+            background: rgba(249,115,22,0.2);
+            border-color: #f97316;
         }
         .player-avatar {
-            background: #ff8c42;
-            width: 80px;
-            height: 80px;
+            background: linear-gradient(145deg, #f97316, #dc2626);
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
             margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #1e2a3e;
-            background: linear-gradient(145deg, #ffae70, #ff7b2c);
-            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.3);
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 2px 2px 0 #9a3412;
+            box-shadow: 0 12px 18px -6px black;
         }
         .player-name {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 6px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 5px;
         }
         .player-role {
             font-size: 0.8rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            background: rgba(0,0,0,0.5);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            margin-top: 6px;
         }
         .player-stats {
-            margin-top: 12px;
+            margin-top: 14px;
             font-size: 0.9rem;
-            background: rgba(0,0,0,0.4);
+            font-weight: 600;
+            background: #00000066;
             border-radius: 60px;
             padding: 6px 12px;
-            display: inline-block;
         }
 
-        /* article paragraph styling */
+        /* article text */
         .article-paragraph {
-            font-size: 1.08rem;
-            line-height: 1.65;
-            color: #1f2a3e;
-            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+            line-height: 1.68;
+            color: #1e293b;
+            margin-bottom: 1.3rem;
             text-align: justify;
         }
-        .article-section {
-            margin-top: 12px;
-        }
 
-        /* RESPONSIVE: LAPTOP (min-width: 1024px) -> show sidebars */
+        /* responsive sidebars */
         @media (min-width: 1024px) {
             .sidebar-left, .sidebar-right {
                 display: block;
@@ -218,231 +256,239 @@
             }
         }
 
-        /* Tablet and below: sidebars hidden, but banner ads remain */
         @media (max-width: 1023px) {
-            .post-layout {
-                gap: 0;
-            }
             .sidebar-left, .sidebar-right {
                 display: none;
             }
             .page-container {
-                padding: 18px;
+                padding: 20px;
             }
         }
 
-        /* small mobile fine-tune */
         @media (max-width: 640px) {
             .match-headline h1 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
-            .player-grid {
-                gap: 16px;
-            }
-            .player-card {
-                padding: 16px;
+            .player-title {
+                font-size: 1.3rem;
             }
             .banner-ad {
-                padding: 14px;
+                padding: 16px;
             }
-        }
-
-        /* article wrapper */
-        .article-wrapper {
-            margin-top: 16px;
-        }
-
-        .spacer-mini {
-            height: 8px;
         }
 
         footer {
-            margin-top: 48px;
+            margin-top: 50px;
             text-align: center;
             font-size: 0.75rem;
-            color: #7e8ba3;
+            color: #64748b;
             border-top: 1px solid #e2e8f0;
-            padding-top: 24px;
+            padding-top: 28px;
+        }
+        .ipl-tag {
+            background: #f9731610;
+            display: inline-block;
+            border-radius: 100px;
+            padding: 2px 12px;
+            font-size: 0.7rem;
         }
     </style>
 </head>
 <body>
 <div class="page-container">
     <div class="post-layout">
-        <!-- LEFT SIDEBAR (ads only laptop) -->
+        <!-- LEFT SIDEBAR (ads only laptop view) -->
         <aside class="sidebar-left">
             <div class="sidebar-ad">
-                <div class="ad-label">Sponsored</div>
-                <div class="ad-content ad-placeholder">
-                    ⚡ Exclusive Offer<br>
-                    <strong>Official Match Merch</strong><br>
-                    Up to 40% OFF<br>
-                    <span style="font-size:12px;">Shop Now →</span>
+                <div class="ad-label">🔥 IPL PARTNER 🔥</div>
+                <div class="ad-content">
+                    <div style="font-size:1.8rem;">🏏</div>
+                    <strong>Dream11 Special</strong><br>
+                    Create your fantasy team & win <br>
+                    <span style="color:#f97316;">₹1 CRORE Guaranteed!</span><br>
+                    <span style="font-size:12px;">Use Code: IPL2025</span>
                 </div>
             </div>
             <div class="sidebar-ad">
-                <div class="ad-label">Partner</div>
+                <div class="ad-label">Official Sponsor</div>
                 <div class="ad-content">
-                    🏆 Bet on next clash<br>
-                    <span style="font-weight:bold;">Get ₹500 Bonus</span><br>
-                    <span style="font-size:11px;">T&C apply</span>
+                    ⚡ <strong>Battery | PowerPlay Energy</strong><br>
+                    Get 2+1 Free on all combos<br>
+                    <span style="font-size:20px;">⬇️ SHOP NOW</span>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT (article + player zone + paragraphs + banner ads) -->
+        <!-- MAIN CONTENT: highlights, iframe video, player zone, article paragraphs -->
         <main class="content-main">
-            <!-- Match Highlights vs Team heading -->
-            <div class="match-headline">
-                <h1>⚽ Match Highlights: <span class="vs-team-highlight">vs Melbourne United</span></h1>
-            </div>
-
-            <!-- Player Area (responsive) -->
-            <div class="player-area">
-                <div class="player-title">🌟 Star Performers & Player Zone</div>
-                <div class="player-grid">
-                    <div class="player-card">
-                        <div class="player-avatar">AK</div>
-                        <div class="player-name">Aryan Kapoor</div>
-                        <div class="player-role">Forward • ⚡ 2 Goals</div>
-                        <div class="player-stats">MOTM | 9.2 rating</div>
-                    </div>
-                    <div class="player-card">
-                        <div class="player-avatar">MJ</div>
-                        <div class="player-name">Marcus Jones</div>
-                        <div class="player-role">Midfielder • 🎯 3 Assists</div>
-                        <div class="player-stats">Key passes: 7</div>
-                    </div>
-                    <div class="player-card">
-                        <div class="player-avatar">LC</div>
-                        <div class="player-name">Liam Chen</div>
-                        <div class="player-role">Defender • 🛡️ Clean Sheet</div>
-                        <div class="player-stats">Tackles: 5 | Interceptions: 4</div>
-                    </div>
-                    <div class="player-card">
-                        <div class="player-avatar">SR</div>
-                        <div class="player-name">Samir Rathi</div>
-                        <div class="player-role">Goalkeeper • 🧤 6 Saves</div>
-                        <div class="player-stats">Penalty save (82')</div>
+            <!-- Match Highlights vs Team (IPL style) -->
+            <div class="match-header">
+                <div class="match-headline">
+                    <h1>🏆 IPL 2025 Highlights: <span class="vs-team-highlight">RCB vs CSK</span> 🏆</h1>
+                    <div style="margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <span class="ipl-tag">🏏 Eliminator Thriller</span>
+                        <span class="ipl-tag">🔥 210/4 vs 206/7</span>
+                        <span class="ipl-tag">⭐ Player of the Match: Virat Kohli (89* off 49)</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Article content with banner ads after every paragraph -->
+            <!-- YOUTUBE IFRAME VIDEO (IPL Highlights) below header -->
+            <div class="video-wrapper">
+                <iframe 
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=highlights_ipl_demo" 
+                    title="IPL Highlights: RCB vs CSK - Match Highlights"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen>
+                </iframe>
+                <!-- Note: replace with official IPL highlight embed. Using placeholder demo but visually works. -->
+            </div>
+
+            <!-- PLAYER AREA (responsive both mobile/pc) -->
+            <div class="player-area">
+                <div class="player-title">
+                    🧡 Impact Players & Game Changers <span>IPL Special</span>
+                </div>
+                <div class="player-grid">
+                    <div class="player-card">
+                        <div class="player-avatar">VK</div>
+                        <div class="player-name">Virat Kohli</div>
+                        <div class="player-role">RCB • Captain</div>
+                        <div class="player-stats">89* (49) | 4 Sixes | SR 181.6</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">JD</div>
+                        <div class="player-name">Jadeja</div>
+                        <div class="player-role">CSK • All-Rounder</div>
+                        <div class="player-stats">3/32 & 38(22) | Game changer</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">MSD</div>
+                        <div class="player-name">MS Dhoni</div>
+                        <div class="player-role">Wicketkeeper • Finisher</div>
+                        <div class="player-stats">26* (9) | 3 massive sixes</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">SS</div>
+                        <div class="player-name">Siraj</div>
+                        <div class="player-role">Pace Spearhead</div>
+                        <div class="player-stats">4/28 | 2 wickets in powerplay</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARTICLE: paragraph wise with banner ads after each paragraph -->
             <div class="article-wrapper">
                 <!-- Paragraph 1 -->
                 <p class="article-paragraph">
-                    In a thrilling contest at the Grand Arena, our team delivered a spectacular performance against Melbourne United, 
-                    sealing a decisive 4-1 victory. The electric atmosphere saw early pressure from both ends, but our midfield dominance 
-                    quickly turned the tide. Marcus Jones orchestrated the attack with pinpoint precision, while Aryan Kapoor’s clinical 
-                    finishing left the opposition stunned. The match not only showcased tactical brilliance but also individual heroics 
-                    that will be remembered for seasons.
+                    In a high-voltage IPL Eliminator at the M. Chinnaswamy Stadium, Royal Challengers Bengaluru edged past Chennai Super Kings 
+                    by 4 runs in a last-ball thriller. Chasing a mammoth 211, CSK needed 18 off the final over, but a sensational bowling display 
+                    from Siraj and a stunning catch at long-on turned the game on its head. The atmosphere was electric as 38,000 fans witnessed 
+                    a classic rivalry renewed. This victory sends RCB to Qualifier 2, while CSK's valiant effort fell just short despite Jadeja's 
+                    all-round heroics.
                 </p>
-                <!-- BANNER AD after paragraph 1 -->
+                <!-- BANNER AD after para 1 -->
                 <div class="banner-ad">
-                    <div class="ad-label">✦ Advertisement ✦</div>
-                    <div class="ad-message">🔥 Grab Your Limited Edition Jersey – 30% Flash Sale! 🔥</div>
-                    <div style="font-size:12px; margin-top:6px;">Use code: MATCHDAY | Free shipping</div>
+                    <div class="ad-label">✦ OFFICIAL IPL DIGITAL PARTNER ✦</div>
+                    <div class="ad-message">📱 Download MyIPL App – Live Scores, Highlights & Contests!</div>
+                    <div class="small-cta">Get ₹500 welcome bonus • Install Now</div>
                 </div>
 
                 <!-- Paragraph 2 -->
                 <p class="article-paragraph">
-                    The opening goal arrived in the 23rd minute: a curling cross from Jones found Kapoor unmarked inside the box, 
-                    and the striker made no mistake with a powerful header into the top corner. Melbourne United tried to respond 
-                    quickly, but our defensive line, marshaled by Liam Chen, remained impenetrable. Just before halftime, a swift 
-                    counter-attack doubled the lead when Kapoor turned provider, slotting a through ball for winger Ethan Brooks 
-                    to smash home. The stadium erupted as the team headed into the break with total control.
+                    RCB’s innings was built around a captain's knock from Virat Kohli, who remained unbeaten on 89 off 49 balls, laced with 8 fours 
+                    and 4 sixes. He found able support from Faf du Plessis (42 off 27) and a late cameo from Maxwell (22 off 9). CSK’s bowlers 
+                    struggled to contain the run flow on a batting paradise, with only Jadeja providing breakthroughs. The target of 211 seemed 
+                    daunting, but Chennai's top-order started aggressively, racing to 68/1 in the powerplay. The stage was set for an epic chase.
                 </p>
-                <!-- BANNER AD after paragraph 2 -->
+                <!-- BANNER AD after para 2 -->
                 <div class="banner-ad">
-                    <div class="ad-label">★ Sponsored Content ★</div>
-                    <div class="ad-message">📺 Watch Full Match Replay + Expert Analysis – Subscribe Now!</div>
-                    <div style="font-size:12px;">First month free • HD streaming</div>
+                    <div class="ad-label">⭐ SPONSORED BY CRICBUZZ ⭐</div>
+                    <div class="ad-message">🏏 Free Fantasy Tips & Expert Team Predictions for Next Match</div>
+                    <div class="small-cta">Join 5 Million+ Winners →</div>
                 </div>
 
                 <!-- Paragraph 3 -->
                 <p class="article-paragraph">
-                    Second half began with renewed energy from Melbourne United, pulling one back in the 56th minute through 
-                    a stunning long-range effort. However, the lead was restored just seven minutes later when Kapoor completed 
-                    his brace, latching onto a clever backheel from Jones. The momentum shifted entirely, and substitute 
-                    forward Diego Silva added a fourth goal in stoppage time, capitalizing on a defensive error. Coach 
-                    praised the team’s resilience and tactical discipline post-match, emphasizing that the victory was a 
-                    collective masterpiece.
+                    CSK needed 58 runs off the last 4 overs with Dhoni and Jadeja at the crease. The equation came down to 28 off the final two overs. 
+                    Mohammed Siraj bowled a stunning 19th over, conceding just 5 runs and taking the key wicket of Jadeja. With 23 needed off the last over, 
+                    Dhoni smashed two massive sixes off the first two balls, bringing the requirement down to 11 off 4 balls. But a sensational low full toss 
+                    resulted in a catch at deep mid-wicket, and CSK fell agonizingly short. RCB players erupted in joy as the crowd roared.
                 </p>
-                <!-- BANNER AD after paragraph 3 -->
+                <!-- BANNER AD after para 3 -->
                 <div class="banner-ad">
-                    <div class="ad-label">⏺ Partners</div>
-                    <div class="ad-message">⚡ Energy Drink Official Partner: Power Through 90 Mins ⚡</div>
-                    <div style="font-size:12px;">Get a free can with match ticket stub</div>
+                    <div class="ad-label">📢 EXCLUSIVE OFFER</div>
+                    <div class="ad-message">⚡ Up to 70% OFF on Official RCB & CSK Jerseys – Limited Stock ⚡</div>
+                    <div class="small-cta">Shop Now | Free Express Delivery</div>
                 </div>
 
                 <!-- Paragraph 4 -->
                 <p class="article-paragraph">
-                    Player of the Match Aryan Kapoor reflected on the win: "The whole squad believed in the game plan. 
-                    Scoring two against a top side like Melbourne feels incredible, but credit to the defense and 
-                    midfield for making my job easier." The team now looks ahead to the next fixture, with playoff 
-                    hopes brighter than ever. Fans on social media celebrated the emphatic win, trending #RiseAgain 
-                    worldwide. The coaching staff will hope to maintain this momentum as the season enters its crucial phase.
+                    Player of the Match Virat Kohli said after the game: "These are the moments you live for. The crowd, the pressure, and the rivalry — it’s 
+                    what makes IPL the greatest league. Credit to the bowlers for holding nerve. We are not done yet." Meanwhile, MS Dhoni remained 
+                    philosophical, highlighting the fighting spirit of his team. Social media exploded with #RCBvCSK trending worldwide for over 8 hours. 
+                    The match will be remembered as one of the greatest IPL thrillers in recent history.
                 </p>
-                <!-- BANNER AD after paragraph 4 -->
+                <!-- BANNER AD after para 4 -->
                 <div class="banner-ad">
-                    <div class="ad-label">📢 Announcement</div>
-                    <div class="ad-message">🎟️ Next Home Match: Early Bird Tickets On Sale – Book Now!</div>
-                    <div style="font-size:12px;">Exclusive hospitality packages available</div>
+                    <div class="ad-label">🎧 LISTEN NOW</div>
+                    <div class="ad-message">IPL Unplugged Podcast – Post-match breakdown with Gavaskar & Harsha</div>
+                    <div class="small-cta">Available on Spotify, Apple Podcasts</div>
                 </div>
 
-                <!-- Paragraph 5 (extra) -->
+                <!-- Paragraph 5 (final match summary) -->
                 <p class="article-paragraph">
-                    Statistical highlights: Our team registered 62% possession, 18 shots (9 on target), and an impressive 
-                    92% passing accuracy in the final third. Melbourne United struggled to contain the fluid attacking 
-                    movements, and our goalkeeper Samir Rathi made two crucial saves late in the game to preserve the 
-                    three-goal margin. This victory marks the third consecutive win at home, and with key players 
-                    returning from injury, the squad depth looks formidable. The upcoming away fixture will be a true test 
-                    of character.
+                    Statistical recap: RCB posted 210/4, while CSK finished at 206/7 in 20 overs. Highest partnership: 79 runs for the 2nd wicket (Kohli & Patidar). 
+                    Most economical bowler: Siraj with figures of 4/28 (economy 7.0). The match saw 16 sixes in total. With this victory, RCB advance to face 
+                    Rajasthan Royals in Qualifier 2. The winner will meet Gujarat Titans in the final. IPL 2025 continues to produce edge-of-the-seat action, 
+                    and fans can expect more fireworks in the coming days. Stay tuned for post-match presentations and expert analysis.
                 </p>
-                <!-- BANNER AD after paragraph 5 -->
+                <!-- BANNER AD after last paragraph -->
                 <div class="banner-ad">
-                    <div class="ad-label">✨ Premium Partner</div>
-                    <div class="ad-message">🏅 Official Fantasy League – Create Your Dream XI & Win Prizes!</div>
-                    <div style="font-size:12px;">Join millions of fans →</div>
+                    <div class="ad-label">🔥 FINAL WEEKS OF IPL 🔥</div>
+                    <div class="ad-message">🎟️ Book Playoff Tickets: Starting at ₹999 • Limited Seats Left!</div>
+                    <div class="small-cta">Official Box Office → Book Your Seat</div>
                 </div>
 
-                <!-- Optional Note: No extra text beyond article paragraphs, each paragraph separated by banner ad as required -->
-                <div class="spacer-mini"></div>
-                <p style="font-style:italic; color:#5b6c88; font-size:0.85rem; margin-top:16px;">*Match report by sports desk. All stats based on official match data.</p>
+                <div style="margin-top: 24px; font-style: italic; border-left: 3px solid #f97316; padding-left: 18px; color: #475569;">
+                    📅 Match Date: May 18, 2025 | Venue: M. Chinnaswamy Stadium, Bengaluru | Umpires: Nitin Menon, Michael Gough
+                </div>
             </div>
         </main>
 
-        <!-- RIGHT SIDEBAR (ads only laptop view) -->
+        <!-- RIGHT SIDEBAR (only laptop view) -->
         <aside class="sidebar-right">
             <div class="sidebar-ad">
-                <div class="ad-label">Trending now</div>
-                <div class="ad-content ad-placeholder">
-                    🎮 Play Predictor Challenge<br>
-                    Win match tickets + merch<br>
-                    <span style="font-weight:bold;">Test your football IQ →</span>
+                <div class="ad-label">🏅 BETTING PARTNER</div>
+                <div class="ad-content">
+                    🚀 <strong>Win up to 10,000x</strong><br>
+                    Predict the next IPL winner<br>
+                    <span style="color:#dc2626;">100% First deposit bonus</span>
                 </div>
             </div>
             <div class="sidebar-ad">
-                <div class="ad-label">Official Partner</div>
+                <div class="ad-label">MERCHANDISE</div>
                 <div class="ad-content">
-                    🧢 New Training Collection<br>
-                    <span style="font-size:20px;">⬇️ 25% off</span><br>
-                    Shop fan favourites
+                    🧢 Limited Edition "Playoff" Caps<br>
+                    🔥 Grab RCB & CSK collector pins<br>
+                    <span style="font-weight:800;">Extra 15% off code: HIGHLIGHT</span>
                 </div>
             </div>
             <div class="sidebar-ad">
-                <div class="ad-label">Podcast</div>
+                <div class="ad-label">FAN ZONE</div>
                 <div class="ad-content">
-                    🎙️ Post-match analysis<br>
-                    Listen to exclusive interviews<br>
-                    <span style="font-size:12px;">Available on Spotify/Apple</span>
+                    📸 Share your match reaction<br>
+                    🎁 Best fan post wins signed jersey!<br>
+                    <span style="font-size:13px;">#IPLHighlightsFanZone</span>
                 </div>
             </div>
         </aside>
     </div>
     <footer>
-        © 2025 Match Pulse — Unauthorized use of content prohibited. All trademarks property of respective leagues.
+        © 2025 IPL Digital | Official Match Highlights Partner. All footage rights reserved by the Board of Control for Cricket in India.
+        This page includes demo iframe for illustrative purposes — replace with official YouTube embed ID.
     </footer>
 </div>
 </body>
