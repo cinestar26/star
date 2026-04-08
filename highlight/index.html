@@ -2,349 +2,448 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>JW Player - HLS Stream Player (M3U8)</title>
-    
-    <!-- JW Player 8 SDK (latest stable from CDN) -->
-    <!-- Includes HLS.js polyfill for cross-browser HLS streaming -->
-    <script src="https://cdn.jwplayer.com/libraries/6H9pNy3b.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Match Pulse: Highlights vs Team | Player Zone & Analysis</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #0b1120 0%, #111827 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 24px;
+            background: #f4f6fa;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            color: #1e2a3e;
+            padding: 20px 16px;
         }
-        
-        .player-card {
-            max-width: 1280px;
-            width: 100%;
-            background: #000000;
+
+        /* main container */
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
             border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
             overflow: hidden;
-            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
-            transition: all 0.2s ease;
+            padding: 24px 24px 48px 24px;
         }
-        
-        .jw-container {
-            position: relative;
-            background: #000;
-            aspect-ratio: 16 / 9;
-            width: 100%;
-        }
-        
-        /* The JW Player element fills container */
-        #jwplayer-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .info-footer {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 1rem 1.5rem;
+
+        /* LAYOUT: FLEX for desktop (sidebars) */
+        .post-layout {
             display: flex;
+            gap: 32px;
             flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            color: #e2e8f0;
         }
-        
-        .badge {
-            background: #dc2626;
-            padding: 5px 12px;
-            border-radius: 100px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+
+        /* MAIN CONTENT AREA (center column) */
+        .content-main {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        /* LEFT & RIGHT SIDEBARS — only visible on laptop/desktop */
+        .sidebar-left, .sidebar-right {
+            width: 280px;
+            flex-shrink: 0;
+            display: none; /* hidden on mobile by default */
+        }
+
+        /* AD containers inside sidebars */
+        .sidebar-ad {
+            background: linear-gradient(145deg, #f0f3f9, #e9eef4);
+            border-radius: 28px;
+            padding: 20px 16px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 6px 12px -8px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+            transition: all 0.2s;
+        }
+        .sidebar-ad .ad-label {
+            font-size: 11px;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            color: #5b6e8c;
+            margin-bottom: 14px;
+            font-weight: 500;
         }
-        
-        .tech-details {
-            display: flex;
-            gap: 20px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.7rem;
-            opacity: 0.75;
+        .sidebar-ad .ad-content {
+            background: white;
+            border-radius: 20px;
+            padding: 28px 12px;
+            border: 1px dashed #b9c4d4;
+            color: #2c3e66;
+            font-weight: 600;
         }
-        
-        .warning-note {
-            background: rgba(0, 0, 0, 0.4);
+        .ad-placeholder {
+            background: #fef9e3;
+            background-image: repeating-linear-gradient(45deg, #ffeedd22 0px, #ffeedd22 25px, #fff3e0 25px, #fff3e0 50px);
+        }
+
+        /* BANNER ADS (between paragraphs) */
+        .banner-ad {
+            background: #fff7eb;
             border-radius: 24px;
-            padding: 6px 14px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            padding: 18px 20px;
+            margin: 28px 0;
+            text-align: center;
+            border-left: 6px solid #ff8c42;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.03);
+            transition: all 0.2s;
         }
-        
-        .warning-note i {
-            font-style: normal;
+        .banner-ad .ad-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #c97e2c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .banner-ad .ad-message {
             font-size: 1rem;
+            font-weight: 500;
+            margin-top: 8px;
+            color: #3b2a1f;
         }
-        
-        @media (max-width: 700px) {
+
+        /* MATCH HEADLINE */
+        .match-headline {
+            margin-bottom: 28px;
+            border-bottom: 3px solid #ff6b35;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+        .match-headline h1 {
+            font-size: 1.9rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1f2f47, #2b3b5c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .vs-team-highlight {
+            color: #e25822;
+        }
+
+        /* PLAYER AREA (responsive grid) */
+        .player-area {
+            background: #0f172a;
+            background: linear-gradient(115deg, #0b1426 0%, #141e38 100%);
+            border-radius: 36px;
+            padding: 28px 24px;
+            margin: 32px 0 40px 0;
+            color: white;
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.3);
+        }
+        .player-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-left: 6px;
+            border-left: 6px solid #ff9f4a;
+        }
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+        .player-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: transform 0.2s ease, background 0.2s;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .player-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.14);
+        }
+        .player-avatar {
+            background: #ff8c42;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1e2a3e;
+            background: linear-gradient(145deg, #ffae70, #ff7b2c);
+            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.3);
+        }
+        .player-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .player-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .player-stats {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.4);
+            border-radius: 60px;
+            padding: 6px 12px;
+            display: inline-block;
+        }
+
+        /* article paragraph styling */
+        .article-paragraph {
+            font-size: 1.08rem;
+            line-height: 1.65;
+            color: #1f2a3e;
+            margin-bottom: 1.2rem;
+            text-align: justify;
+        }
+        .article-section {
+            margin-top: 12px;
+        }
+
+        /* RESPONSIVE: LAPTOP (min-width: 1024px) -> show sidebars */
+        @media (min-width: 1024px) {
+            .sidebar-left, .sidebar-right {
+                display: block;
+            }
             body {
-                padding: 12px;
+                padding: 28px 32px;
             }
-            .info-footer {
-                flex-direction: column;
-                align-items: flex-start;
+        }
+
+        /* Tablet and below: sidebars hidden, but banner ads remain */
+        @media (max-width: 1023px) {
+            .post-layout {
+                gap: 0;
             }
+            .sidebar-left, .sidebar-right {
+                display: none;
+            }
+            .page-container {
+                padding: 18px;
+            }
+        }
+
+        /* small mobile fine-tune */
+        @media (max-width: 640px) {
+            .match-headline h1 {
+                font-size: 1.5rem;
+            }
+            .player-grid {
+                gap: 16px;
+            }
+            .player-card {
+                padding: 16px;
+            }
+            .banner-ad {
+                padding: 14px;
+            }
+        }
+
+        /* article wrapper */
+        .article-wrapper {
+            margin-top: 16px;
+        }
+
+        .spacer-mini {
+            height: 8px;
+        }
+
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #7e8ba3;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 24px;
         }
     </style>
 </head>
 <body>
+<div class="page-container">
+    <div class="post-layout">
+        <!-- LEFT SIDEBAR (ads only laptop) -->
+        <aside class="sidebar-left">
+            <div class="sidebar-ad">
+                <div class="ad-label">Sponsored</div>
+                <div class="ad-content ad-placeholder">
+                    ⚡ Exclusive Offer<br>
+                    <strong>Official Match Merch</strong><br>
+                    Up to 40% OFF<br>
+                    <span style="font-size:12px;">Shop Now →</span>
+                </div>
+            </div>
+            <div class="sidebar-ad">
+                <div class="ad-label">Partner</div>
+                <div class="ad-content">
+                    🏆 Bet on next clash<br>
+                    <span style="font-weight:bold;">Get ₹500 Bonus</span><br>
+                    <span style="font-size:11px;">T&C apply</span>
+                </div>
+            </div>
+        </aside>
 
-<div class="player-card">
-    <div class="jw-container">
-        <!-- JW Player will be injected inside this div -->
-        <div id="jwplayer-container"></div>
+        <!-- MAIN CONTENT (article + player zone + paragraphs + banner ads) -->
+        <main class="content-main">
+            <!-- Match Highlights vs Team heading -->
+            <div class="match-headline">
+                <h1>⚽ Match Highlights: <span class="vs-team-highlight">vs Melbourne United</span></h1>
+            </div>
+
+            <!-- Player Area (responsive) -->
+            <div class="player-area">
+                <div class="player-title">🌟 Star Performers & Player Zone</div>
+                <div class="player-grid">
+                    <div class="player-card">
+                        <div class="player-avatar">AK</div>
+                        <div class="player-name">Aryan Kapoor</div>
+                        <div class="player-role">Forward • ⚡ 2 Goals</div>
+                        <div class="player-stats">MOTM | 9.2 rating</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">MJ</div>
+                        <div class="player-name">Marcus Jones</div>
+                        <div class="player-role">Midfielder • 🎯 3 Assists</div>
+                        <div class="player-stats">Key passes: 7</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">LC</div>
+                        <div class="player-name">Liam Chen</div>
+                        <div class="player-role">Defender • 🛡️ Clean Sheet</div>
+                        <div class="player-stats">Tackles: 5 | Interceptions: 4</div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">SR</div>
+                        <div class="player-name">Samir Rathi</div>
+                        <div class="player-role">Goalkeeper • 🧤 6 Saves</div>
+                        <div class="player-stats">Penalty save (82')</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Article content with banner ads after every paragraph -->
+            <div class="article-wrapper">
+                <!-- Paragraph 1 -->
+                <p class="article-paragraph">
+                    In a thrilling contest at the Grand Arena, our team delivered a spectacular performance against Melbourne United, 
+                    sealing a decisive 4-1 victory. The electric atmosphere saw early pressure from both ends, but our midfield dominance 
+                    quickly turned the tide. Marcus Jones orchestrated the attack with pinpoint precision, while Aryan Kapoor’s clinical 
+                    finishing left the opposition stunned. The match not only showcased tactical brilliance but also individual heroics 
+                    that will be remembered for seasons.
+                </p>
+                <!-- BANNER AD after paragraph 1 -->
+                <div class="banner-ad">
+                    <div class="ad-label">✦ Advertisement ✦</div>
+                    <div class="ad-message">🔥 Grab Your Limited Edition Jersey – 30% Flash Sale! 🔥</div>
+                    <div style="font-size:12px; margin-top:6px;">Use code: MATCHDAY | Free shipping</div>
+                </div>
+
+                <!-- Paragraph 2 -->
+                <p class="article-paragraph">
+                    The opening goal arrived in the 23rd minute: a curling cross from Jones found Kapoor unmarked inside the box, 
+                    and the striker made no mistake with a powerful header into the top corner. Melbourne United tried to respond 
+                    quickly, but our defensive line, marshaled by Liam Chen, remained impenetrable. Just before halftime, a swift 
+                    counter-attack doubled the lead when Kapoor turned provider, slotting a through ball for winger Ethan Brooks 
+                    to smash home. The stadium erupted as the team headed into the break with total control.
+                </p>
+                <!-- BANNER AD after paragraph 2 -->
+                <div class="banner-ad">
+                    <div class="ad-label">★ Sponsored Content ★</div>
+                    <div class="ad-message">📺 Watch Full Match Replay + Expert Analysis – Subscribe Now!</div>
+                    <div style="font-size:12px;">First month free • HD streaming</div>
+                </div>
+
+                <!-- Paragraph 3 -->
+                <p class="article-paragraph">
+                    Second half began with renewed energy from Melbourne United, pulling one back in the 56th minute through 
+                    a stunning long-range effort. However, the lead was restored just seven minutes later when Kapoor completed 
+                    his brace, latching onto a clever backheel from Jones. The momentum shifted entirely, and substitute 
+                    forward Diego Silva added a fourth goal in stoppage time, capitalizing on a defensive error. Coach 
+                    praised the team’s resilience and tactical discipline post-match, emphasizing that the victory was a 
+                    collective masterpiece.
+                </p>
+                <!-- BANNER AD after paragraph 3 -->
+                <div class="banner-ad">
+                    <div class="ad-label">⏺ Partners</div>
+                    <div class="ad-message">⚡ Energy Drink Official Partner: Power Through 90 Mins ⚡</div>
+                    <div style="font-size:12px;">Get a free can with match ticket stub</div>
+                </div>
+
+                <!-- Paragraph 4 -->
+                <p class="article-paragraph">
+                    Player of the Match Aryan Kapoor reflected on the win: "The whole squad believed in the game plan. 
+                    Scoring two against a top side like Melbourne feels incredible, but credit to the defense and 
+                    midfield for making my job easier." The team now looks ahead to the next fixture, with playoff 
+                    hopes brighter than ever. Fans on social media celebrated the emphatic win, trending #RiseAgain 
+                    worldwide. The coaching staff will hope to maintain this momentum as the season enters its crucial phase.
+                </p>
+                <!-- BANNER AD after paragraph 4 -->
+                <div class="banner-ad">
+                    <div class="ad-label">📢 Announcement</div>
+                    <div class="ad-message">🎟️ Next Home Match: Early Bird Tickets On Sale – Book Now!</div>
+                    <div style="font-size:12px;">Exclusive hospitality packages available</div>
+                </div>
+
+                <!-- Paragraph 5 (extra) -->
+                <p class="article-paragraph">
+                    Statistical highlights: Our team registered 62% possession, 18 shots (9 on target), and an impressive 
+                    92% passing accuracy in the final third. Melbourne United struggled to contain the fluid attacking 
+                    movements, and our goalkeeper Samir Rathi made two crucial saves late in the game to preserve the 
+                    three-goal margin. This victory marks the third consecutive win at home, and with key players 
+                    returning from injury, the squad depth looks formidable. The upcoming away fixture will be a true test 
+                    of character.
+                </p>
+                <!-- BANNER AD after paragraph 5 -->
+                <div class="banner-ad">
+                    <div class="ad-label">✨ Premium Partner</div>
+                    <div class="ad-message">🏅 Official Fantasy League – Create Your Dream XI & Win Prizes!</div>
+                    <div style="font-size:12px;">Join millions of fans →</div>
+                </div>
+
+                <!-- Optional Note: No extra text beyond article paragraphs, each paragraph separated by banner ad as required -->
+                <div class="spacer-mini"></div>
+                <p style="font-style:italic; color:#5b6c88; font-size:0.85rem; margin-top:16px;">*Match report by sports desk. All stats based on official match data.</p>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR (ads only laptop view) -->
+        <aside class="sidebar-right">
+            <div class="sidebar-ad">
+                <div class="ad-label">Trending now</div>
+                <div class="ad-content ad-placeholder">
+                    🎮 Play Predictor Challenge<br>
+                    Win match tickets + merch<br>
+                    <span style="font-weight:bold;">Test your football IQ →</span>
+                </div>
+            </div>
+            <div class="sidebar-ad">
+                <div class="ad-label">Official Partner</div>
+                <div class="ad-content">
+                    🧢 New Training Collection<br>
+                    <span style="font-size:20px;">⬇️ 25% off</span><br>
+                    Shop fan favourites
+                </div>
+            </div>
+            <div class="sidebar-ad">
+                <div class="ad-label">Podcast</div>
+                <div class="ad-content">
+                    🎙️ Post-match analysis<br>
+                    Listen to exclusive interviews<br>
+                    <span style="font-size:12px;">Available on Spotify/Apple</span>
+                </div>
+            </div>
+        </aside>
     </div>
-    <div class="info-footer">
-        <div class="badge">🔴 HLS STREAM · M3U8</div>
-        <div class="tech-details">
-            <span>🎥 JW Player 8</span>
-            <span>⚡ Adaptive Bitrate</span>
-            <span>📡 Quality selector</span>
-        </div>
-        <div class="warning-note">
-            <i>⚠️</i> Requires valid stream token / cookies if access restricted
-        </div>
-    </div>
+    <footer>
+        © 2025 Match Pulse — Unauthorized use of content prohibited. All trademarks property of respective leagues.
+    </footer>
 </div>
-
-<script>
-    (function() {
-        // --------------------------------------------------------------
-        // 🔥 THE M3U8 URL (Hotstar / IPL 2026 stream example)
-        // --------------------------------------------------------------
-        const STREAM_URL = "https://vod01.akt.hotstar-cdn.net/videos/cricket/inallow-ipl-2026-1540066073/1540066074/b8fd04046ec040d59e857dfaa40d30d4/index_7.m3u8";
-        
-        // --------------------------------------------------------------
-        // ⚙️ OPTIONAL: If the stream requires specific HTTP headers (e.g., Referer, Origin, Authorization)
-        // JW Player supports token-based authentication via 'hlsjsconfig' or custom request headers.
-        // Note: Most DRM / token-protected streams (Hotstar) require a valid session cookie.
-        // The headers below are examples; you may need to extract actual session from browser.
-        // --------------------------------------------------------------
-        const CUSTOM_HEADERS = {
-            // "Referer": "https://www.hotstar.com/",
-            // "Origin": "https://www.hotstar.com",
-            // "Authorization": "Bearer YOUR_TOKEN_HERE"
-        };
-        
-        // Helper: If custom headers are needed, we inject them into hls.js config (used by JW Player on non-Safari)
-        function getHlsJsConfig() {
-            if (Object.keys(CUSTOM_HEADERS).length === 0) {
-                return {}; // default config
-            }
-            // hls.js configuration to attach custom headers on each fragment request
-            return {
-                xhrSetup: function(xhr, url) {
-                    for (const [key, value] of Object.entries(CUSTOM_HEADERS)) {
-                        xhr.setRequestHeader(key, value);
-                    }
-                }
-            };
-        }
-        
-        // Wait for DOM and JW Player API to be ready
-        document.addEventListener("DOMContentLoaded", function() {
-            // Get the container element
-            const playerElement = document.getElementById("jwplayer-container");
-            if (!playerElement) {
-                console.error("JW Player container not found");
-                return;
-            }
-            
-            // Setup JW Player configuration
-            // For HLS streams, JW Player uses native HLS on Safari + hls.js on other browsers
-            const playerConfig = {
-                // The div ID or element reference
-                container: playerElement,
-                // Stream file
-                file: STREAM_URL,
-                // Tell JW Player it's an HLS stream (explicit type)
-                type: "hls",
-                // Primary rendering: html5 ensures best HLS support
-                primary: "html5",
-                // Autostart can be set to false by default; user can click play
-                autostart: false,
-                // Mute start is not required, but we let user control volume
-                mute: false,
-                // Show quality selection button if multiple renditions exist in M3U8
-                // JW Player automatically detects bitrates and adds quality menu
-                // Force quality selection UI to be visible
-                allowFullscreen: true,
-                // Enable controls
-                controls: true,
-                // Provide a poster frame (optional, can be removed)
-                // image: "https://assets.codepen.io/32795/hotstar-poster-placeholder.jpg",
-                // Preload metadata for faster startup
-                preload: "auto",
-                // To handle potential token expiration or CORS issues, we can set up provider options
-                // For HLS, JW Player uses its internal HLS provider; we can forward custom hls.js config
-                hlsjsConfig: getHlsJsConfig(),
-                // If the stream requires advanced CORS with credentials (cookies), we enable:
-                // This helps to send cookies along with segment requests.
-                // Important: Hotstar tokens usually rely on cookies. This must be allowed by CORS.
-                withCredentials: true,   // Sends cookies & authorization headers cross-origin if CORS allows
-                
-                // Optionally configure the quality label behavior
-                // JW Player automatically lists renditions in settings gear.
-                // Enable "auto" quality option.
-                qualityLabels: {
-                    auto: "Auto (Adaptive)",
-                    low: "Low",
-                    medium: "Medium",
-                    high: "High"
-                },
-                
-                // To handle errors gracefully (like 403 Forbidden)
-                // Show custom error message if stream can't load.
-                // Note: JW Player will display generic error; we can capture and enhance.
-            };
-            
-            // Initialize JW Player instance
-            let jwplayerInstance = jwplayer("jwplayer-container").setup(playerConfig);
-            
-            // Event listeners for debugging / user feedback
-            jwplayerInstance.on("ready", function() {
-                console.log("✅ JW Player is ready, attempting to load HLS stream.");
-                // Attempt to play? Usually user clicks play. But we can check autostart false.
-            });
-            
-            jwplayerInstance.on("error", function(error) {
-                console.error("❌ JW Player error:", error);
-                // Provide more descriptive feedback based on error code
-                let errorMessage = "Unable to play the stream. ";
-                if (error.message) errorMessage += error.message;
-                if (error.code === 100011) { // HLS load error
-                    errorMessage = "Failed to load M3U8 manifest. The stream may require authentication, a valid session, or geographic permissions. (403 / token missing)";
-                } else if (error.code === 100002 || error.code === 100003) {
-                    errorMessage = "Network error or CORS block. The server might be rejecting cross-origin requests. Check if custom headers or cookies are needed.";
-                } else if (error.code === 100005) {
-                    errorMessage = "HLS parsing error – the stream URL might be expired or malformed.";
-                }
-                // Show a friendly overlay message in the player (optional)
-                // jwplayerInstance.addButton? not needed. Just log + we can display on container
-                const errorDiv = document.createElement("div");
-                errorDiv.style.position = "absolute";
-                errorDiv.style.bottom = "60px";
-                errorDiv.style.left = "20px";
-                errorDiv.style.right = "20px";
-                errorDiv.style.backgroundColor = "rgba(0,0,0,0.75)";
-                errorDiv.style.color = "#ffb3b3";
-                errorDiv.style.padding = "12px 18px";
-                errorDiv.style.borderRadius = "12px";
-                errorDiv.style.fontSize = "13px";
-                errorDiv.style.fontFamily = "monospace";
-                errorDiv.style.zIndex = "100";
-                errorDiv.style.backdropFilter = "blur(8px)";
-                errorDiv.style.borderLeft = "3px solid #ff4d4d";
-                errorDiv.innerText = `⚠️ ${errorMessage} \n\nPossible reasons:\n• Expired/token-protected link\n• Missing Hotstar authentication\n• Geo-restriction\n\nTry playing through official Hotstar app.`;
-                const container = document.querySelector(".jw-container");
-                if (container && !container.querySelector(".custom-error-overlay")) {
-                    errorDiv.classList.add("custom-error-overlay");
-                    container.style.position = "relative";
-                    container.appendChild(errorDiv);
-                    setTimeout(() => {
-                        if (errorDiv.parentNode) errorDiv.style.opacity = "0.8";
-                    }, 100);
-                }
-            });
-            
-            jwplayerInstance.on("levelsChanged", function(event) {
-                console.log("🎚️ Available quality levels (renditions):", event.levels);
-                // JW Player automatically adds gear icon -> quality menu
-                if (event.levels && event.levels.length > 0) {
-                    const qualityCount = event.levels.length;
-                    console.log(`📊 Detected ${qualityCount} quality levels. User can change via settings.`);
-                }
-            });
-            
-            jwplayerInstance.on("levelChanged", function(event) {
-                if (event.currentLevel) {
-                    const height = event.currentLevel.height;
-                    console.log(`🔄 Switched to quality: ${height ? height + 'p' : 'adaptive'}`);
-                }
-            });
-            
-            jwplayerInstance.on("setupError", function(err) {
-                console.warn("JW Player setup error:", err);
-            });
-            
-            // Additional helper: Because Hotstar links often return 403 due to missing Referer / Origin
-            // Note: JW Player's hlsjsConfig with custom xhrSetup works only on browsers where hls.js is used (non-Safari)
-            // For Safari native HLS, we cannot inject headers easily. Provide notice to user.
-            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-            if (isSafari) {
-                console.warn("Safari uses native HLS, custom headers via hls.js are NOT applied. If stream requires specific headers, playback may fail.");
-                // Optionally display subtle reminder in footer
-                const footerNote = document.querySelector(".warning-note");
-                if (footerNote) {
-                    footerNote.innerHTML = "<i>🍎</i> Safari: native HLS – some auth headers may be omitted. If 403 persists, use Chrome/Edge with proper cookies.";
-                }
-            } else {
-                console.log("Using hls.js via JW Player – custom headers (if any) will be applied to fragment requests.");
-            }
-            
-            // Handle visibility / cleanup on page unload (optional)
-            window.addEventListener("beforeunload", function() {
-                if (jwplayerInstance && typeof jwplayerInstance.remove === "function") {
-                    jwplayerInstance.remove();
-                }
-            });
-            
-            // Expose instance for debugging (optional)
-            window.jwPlayerDebug = jwplayerInstance;
-        });
-    })();
-</script>
-
-<!-- 
-    Additional note: 
-    The provided M3U8 URL is from Hotstar CDN and almost certainly requires:
-    1. A valid 'session token' or 'jwt' cookie tied to an active Hotstar subscription.
-    2. The 'Referer' header set to 'https://www.hotstar.com'.
-    3. The correct 'Origin' and possibly 'x-api-key' headers.
-    
-    To make this work with JW Player:
-    - You must be logged into Hotstar in the same browser (shared cookies).
-    - The domain serving this HTML must have access to those cookies (same domain or properly configured CORS).
-    - The stream token in the URL might expire after a few minutes.
-    
-    For production use, you should extract a fresh M3U8 URL from Hotstar's API while authenticated.
-    
-    JW Player with custom headers example:
-    Uncomment CUSTOM_HEADERS object above and set your token / referrer.
-    Example:
-        const CUSTOM_HEADERS = {
-            "Referer": "https://www.hotstar.com/",
-            "Origin": "https://www.hotstar.com"
-        };
-    
-    Additionally, you can enable 'withCredentials: true' as set above to pass cookies.
-    If the server requires an Authorization Bearer token, add it to CUSTOM_HEADERS.
--->
 </body>
 </html>
