@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Star Sports // CineArena</title>
+<title>Cine Sports // CineArena</title>
 <meta name="referrer" content="no-referrer">
 <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css"/>
@@ -41,15 +41,48 @@ background:#000;
 position:absolute;
 z-index:40;
 pointer-events:none;
-top:65%;
-left:6%;
-transform:translateY(-50%);
+bottom:20px;
+left:20px;
 font-size:11px;
 font-weight:600;
-color:rgba(255,255,255,0.12);
+color:rgba(255,255,255,0.15);
+background:rgba(0,0,0,0.5);
+padding:4px 8px;
+border-radius:4px;
 }
 
-/* --- Updated Modern Blocker Styles --- */
+/* Loading indicator */
+.loading-overlay {
+position: fixed;
+inset: 0;
+z-index: 99998;
+display: flex;
+align-items: center;
+justify-content: center;
+background: #000;
+flex-direction: column;
+gap: 20px;
+}
+
+.spinner {
+width: 50px;
+height: 50px;
+border: 3px solid rgba(255,255,255,0.1);
+border-top-color: #ff0000;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+
+.loading-text {
+color: #fff;
+font-size: 14px;
+font-family: monospace;
+}
+
 .block-overlay{
 position:fixed;
 inset:0;
@@ -65,9 +98,9 @@ text-align:center;
 padding:40px;
 max-width:500px;
 width:90%;
-background:rgba(20, 20, 20, 0.95);
+background:rgba(20,20,20,0.95);
 border-radius:16px;
-border:1px solid rgba(255, 255, 255, 0.1);
+border:1px solid rgba(255,255,255,0.1);
 box-shadow:0 20px 50px rgba(0,0,0,0.5);
 animation: fadeInUp 0.6s ease-out;
 }
@@ -84,78 +117,98 @@ color:#ffffff;
 text-transform:uppercase;
 letter-spacing:2px;
 margin-bottom:20px;
-text-shadow:0 0 10px rgba(255, 0, 0, 0.3);
 }
 
 .block-sub{
 font-size:14px;
 font-weight:500;
-color:rgba(255, 255, 255, 0.6);
+color:rgba(255,255,255,0.6);
 line-height:1.6;
 }
 
-.block-icon{ display: none; }
-.block-note{ display: none; }
+.error-toast {
+position: fixed;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(0,0,0,0.9);
+color: #ff4444;
+padding: 12px 24px;
+border-radius: 8px;
+font-size: 14px;
+z-index: 100000;
+border-left: 3px solid #ff4444;
+font-family: monospace;
+pointer-events: none;
+}
 
 @media(max-width:700px){
-.custom-watermark{font-size:9px;top:60%;left:16%}
 .block-title{font-size:28px}
 .block-box{padding:25px}
-.block-sub{font-size:12px}
 }
 </style>
 </head>
 <body>
 
 <div class="shaka-video-container" id="player-container">
-<video id="video" autoplay muted playsinline preload="metadata"></video>
-<div class="custom-watermark"></div>
+<video id="video" autoplay muted playsinline preload="auto"></video>
+<div class="custom-watermark">Star Sports • Live</div>
 </div>
 
 <script>
 (function(){
   
+  function showErrorToast(message) {
+    const existing = document.querySelector('.error-toast');
+    if(existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+  }
+  
+  function showLoading() {
+    let loader = document.getElementById('custom-loader');
+    if(!loader) {
+      loader = document.createElement('div');
+      loader.id = 'custom-loader';
+      loader.className = 'loading-overlay';
+      loader.innerHTML = '<div class="spinner"></div><div class="loading-text">Loading stream...</div>';
+      document.body.appendChild(loader);
+    }
+    return loader;
+  }
+  
+  function hideLoading() {
+    const loader = document.getElementById('custom-loader');
+    if(loader) loader.remove();
+  }
+  
   function isSandboxedEnv(){
     try {
       if (window.self === window.top) return false;
-      if (window.frameElement && window.frameElement.hasAttribute("sandbox")) {
-        return true;
-      }
+      if (window.frameElement && window.frameElement.hasAttribute("sandbox")) return true;
       try {
         document.domain = document.domain;
-        if (window.frameElement && !window.frameElement.getAttribute("sandbox")) {
-             return false;
-        }
-      } catch (e) {
-         return true;
-      }
+        if (window.frameElement && !window.frameElement.getAttribute("sandbox")) return false;
+      } catch(e) { return true; }
       return false;
-    } catch(e) {
-      return true;
-    }
+    } catch(e) { return true; }
   }
   
   function triggerBlockScreen(title, message){
     const container = document.getElementById("player-container");
     const video = document.getElementById("video");
-    
     try {
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
+      if(video) { video.pause(); video.removeAttribute('src'); video.load(); }
     } catch(e){}
-
     const overlay = document.createElement("div");
     overlay.className = "block-overlay";
-    overlay.id = "sandbox-block-display";
-    overlay.innerHTML = `
-      <div class="block-box">
-        <div class="block-title">${title}</div>
-        <div class="block-sub">${message}</div>
-      </div>
-    `;
+    overlay.innerHTML = `<div class="block-box"><div class="block-title">${title}</div><div class="block-sub">${message}</div></div>`;
     document.body.appendChild(overlay);
     if(container) container.style.display = 'none';
+    hideLoading();
   }
   
   if(isSandboxedEnv()){
@@ -163,51 +216,94 @@ line-height:1.6;
     return;
   }
   
-  // --- DIRECT COOKIE PROVIDED (HARDCODED) ---
-  // Using the exact cookie string from the user request to avoid any fetch errors
+  // DIRECT COOKIE (hardcoded)
   const DIRECT_COOKIE = "__hdnea__=st=1775665043~exp=1775686643~acl=/*~hmac=a5bcb05f8c700dac65443e83c24b4a2f37db6d51ee42a738ec221519b4fc01fa";
   
-  const CONFIG={
+  // Extract token value for URL param
+  const HDNEA_VALUE = DIRECT_COOKIE.replace("__hdnea__=", "");
+  
+  const CONFIG = {
     streamUrl: "https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd",
     keyId: "49e84b9edfd85379b90c81b7d2d3d2bf",
-    key: "19c82d3ff094fa06af95820a1572ecb5",
-    // No cookieUrl needed anymore, using direct cookie
+    key: "19c82d3ff094fa06af95820a1572ecb5"
   };
-
+  
   document.addEventListener("DOMContentLoaded", async () => {
-    // Check if Shaka is available
-    if (typeof shaka === 'undefined') {
-      console.error("Shaka Player not loaded");
+    showLoading();
+    
+    // Wait for shaka
+    if(typeof shaka === 'undefined') {
+      showErrorToast("Shaka Player failed to load. Please refresh.");
+      hideLoading();
       return;
     }
     
     try {
       shaka.polyfill.installAll();
-    } catch(e) { console.warn("Polyfill install issue", e); }
+    } catch(e) { console.warn(e); }
     
     if(!shaka.Player.isBrowserSupported()) {
-      console.warn("Browser not supported");
+      showErrorToast("Your browser does not support required video playback features.");
+      hideLoading();
       return;
     }
-
+    
     const video = document.getElementById("video");
     const container = document.getElementById("player-container");
     
     if(!video || !container) return;
     
+    // Reset video
     video.muted = true;
-
-    const player = new shaka.Player();
-    await player.attach(video);
-
-    // Initialize UI overlay
-    const ui = new shaka.ui.Overlay(player, container, video);
     
+    const player = new shaka.Player(video);
+    
+    // Configure DRM FIRST
+    player.configure({
+      drm: {
+        clearKeys: {
+          [CONFIG.keyId]: CONFIG.key
+        },
+        retryParameters: {
+          maxAttempts: 3,
+          baseDelay: 1000,
+          backoffFactor: 2
+        }
+      },
+      manifest: {
+        retryParameters: {
+          maxAttempts: 3,
+          baseDelay: 1000,
+          backoffFactor: 2
+        }
+      },
+      streaming: {
+        retryParameters: {
+          maxAttempts: 4,
+          baseDelay: 500,
+          backoffFactor: 2
+        },
+        bufferingGoal: 30,
+        rebufferingGoal: 10,
+        safeSeekOffset: 5,
+        lowLatencyMode: false
+      },
+      network: {
+        retryParameters: {
+          maxAttempts: 4,
+          baseDelay: 1000,
+          backoffFactor: 2
+        }
+      }
+    });
+    
+    // Setup UI
+    const ui = new shaka.ui.Overlay(player, container, video);
     ui.configure({
       addBigPlayButton: true,
       controlPanelElements: [
         "mute",
-        "play_pause",  
+        "play_pause",
         "time_and_duration",
         "spacer",
         "quality",
@@ -216,158 +312,146 @@ line-height:1.6;
       ],
       seekBarColors: {
         base: "white",
-        buffered: "red", 
-        played: "green"
+        buffered: "#666",
+        played: "#ff0000"
       }
     });
-
-    // Configure DRM with clear keys
-    player.configure({
-      drm: {
-        clearKeys: {
-          [CONFIG.keyId]: CONFIG.key
-        }
-      },
-      manifest: {
-        defaultPresentationDelay: 5
-      },
-      streaming: {
-        lowLatencyMode: true,
-        bufferingGoal: 10,
-        rebufferingGoal: 2,
-        safeSeekOffset: 5
-      }
-    });
-
-    // Get networking engine to inject custom headers and cookie
+    
+    // Register request filter for headers and URL token
     const netEngine = player.getNetworkingEngine();
     
-    // Extract the hdnea value without "__hdnea__=" prefix for URL appending
-    let hdneaValue = "";
-    if (DIRECT_COOKIE.startsWith("__hdnea__=")) {
-      hdneaValue = DIRECT_COOKIE.substring(10); // Remove "__hdnea__=" prefix
-    } else {
-      hdneaValue = DIRECT_COOKIE;
-    }
-    
-    // Register request filter to add headers and inject __hdnea__ parameter
     netEngine.registerRequestFilter((type, request) => {
-      // Always set essential headers for JioTV streaming
+      // Add required headers for Jio CDN
+      if(!request.headers) request.headers = {};
       request.headers["Referer"] = "https://www.jiotv.com/";
-      request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-      request.headers["Cookie"] = DIRECT_COOKIE;
       request.headers["Origin"] = "https://www.jiotv.com";
+      request.headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+      request.headers["Cookie"] = DIRECT_COOKIE;
       
-      // For manifest and segment requests, append __hdnea__ query parameter if not already present
-      if ((type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-           type === shaka.net.NetworkingEngine.RequestType.SEGMENT) &&
-          request.uris && request.uris.length > 0) {
-        
-        const uri = request.uris[0];
-        // Avoid double injection
-        if (!uri.includes("__hdnea__")) {
-          const separator = uri.includes("?") ? "&" : "?";
-          request.uris[0] = uri + separator + "__hdnea__=" + encodeURIComponent(hdneaValue);
+      // For manifest and segments, append __hdnea__ to URL
+      if(request.uris && request.uris.length > 0) {
+        let uri = request.uris[0];
+        // Only add if not already present
+        if(!uri.includes("__hdnea__")) {
+          const separator = uri.includes('?') ? '&' : '?';
+          // Use the full cookie value as param? Some CDNs expect the token value
+          request.uris[0] = uri + separator + "__hdnea__=" + encodeURIComponent(HDNEA_VALUE);
         }
       }
     });
     
-    // Optional: Add response filter for debugging (silent)
+    // Add response filter to handle potential redirects
     netEngine.registerResponseFilter((type, response) => {
-      // Just to ensure no CORS or cookie issues, we don't modify but keep pass-through
-      // This helps maintain compatibility
+      if(response && response.headers && response.headers['location']) {
+        console.log("Redirect detected:", response.headers['location']);
+      }
     });
     
-    // Function to load stream with retry mechanism
+    // Error handling
     let retryCount = 0;
-    const MAX_RETRIES = 2;
+    const MAX_RETRIES = 3;
     
-    async function loadStream() {
+    player.addEventListener('error', (event) => {
+      const error = event.detail;
+      console.error("Player error:", error);
+      
+      let errorMsg = "Playback error: ";
+      if(error.code === 1002) errorMsg += "Network error - check your connection";
+      else if(error.code === 6001) errorMsg += "Manifest fetch failed - server may be busy";
+      else if(error.code === 6012) errorMsg += "DRM license error - authentication failed";
+      else if(error.code === 1001) errorMsg += "Stream not found";
+      else errorMsg += error.message || "Unknown error";
+      
+      if(retryCount < MAX_RETRIES && (error.code === 1002 || error.code === 6001 || error.code === 6012)) {
+        retryCount++;
+        console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+        showErrorToast(`Connection issue. Retrying (${retryCount}/${MAX_RETRIES})...`);
+        setTimeout(() => {
+          player.unload().then(() => {
+            loadStream(player, video);
+          }).catch(e => console.warn);
+        }, 2000);
+      } else {
+        hideLoading();
+        showErrorToast(errorMsg + " Please refresh the page.");
+      }
+    });
+    
+    // Successful playback
+    player.addEventListener('loading', () => {
+      console.log("Loading stream...");
+    });
+    
+    player.addEventListener('loaded', () => {
+      console.log("Stream loaded successfully");
+      hideLoading();
+      video.play().catch(e => {
+        console.log("Autoplay blocked:", e);
+        // Show play button hint if needed - UI already has big play button
+      });
+    });
+    
+    player.addEventListener('trackschanged', () => {
+      console.log("Tracks available");
+    });
+    
+    // Function to load stream with modified URL approach (sometimes manifest needs token)
+    async function loadStream(playerInstance, videoElement) {
       try {
-        await player.load(CONFIG.streamUrl);
-        // Attempt to unmute after user interaction or autoplay policies
-        video.play().catch(e => {
-          console.warn("Autoplay prevented:", e);
-          // Show subtle hint for user to click if needed? Not needed because muted autoplay works
-        });
-        
-        // Once stream is loaded, allow unmuting after any user interaction or once playing
-        video.addEventListener("play", () => {
-          // Unmute only if user might expect sound, but we start muted, let user unmute via UI
-          // Shaka UI provides mute button, so we don't auto-unmute to respect browser policies
-        });
-        
-        retryCount = 0; // reset on success
-      } catch (error) {
-        console.error("Error loading stream:", error);
-        if (retryCount < MAX_RETRIES) {
-          retryCount++;
-          console.log(`Retrying stream load (${retryCount}/${MAX_RETRIES})...`);
-          setTimeout(loadStream, 1500);
-        } else {
-          // Show user friendly error within container
-          const overlay = document.createElement("div");
-          overlay.style.position = "fixed";
-          overlay.style.bottom = "20px";
-          overlay.style.left = "20px";
-          overlay.style.right = "20px";
-          overlay.style.backgroundColor = "rgba(0,0,0,0.8)";
-          overlay.style.color = "#ff4444";
-          overlay.style.padding = "12px 20px";
-          overlay.style.borderRadius = "8px";
-          overlay.style.fontSize = "14px";
-          overlay.style.textAlign = "center";
-          overlay.style.zIndex = "10000";
-          overlay.style.fontFamily = "monospace";
-          overlay.innerHTML = "⚠️ Stream connection failed. Please refresh the page or check your network. ⚠️";
-          document.body.appendChild(overlay);
-          setTimeout(() => overlay.remove(), 5000);
-        }
+        // Try loading with direct URL first (filter will add token)
+        await playerInstance.load(CONFIG.streamUrl);
+        retryCount = 0;
+      } catch(error) {
+        console.error("Load failed:", error);
+        throw error;
       }
     }
     
-    // Also listen for player error events for better UX
-    player.addEventListener('error', (event) => {
-      console.error("Shaka player error:", event.detail);
-      const errorMsg = event.detail;
-      // If it's a license or manifest error related to auth, we could retry once
-      if (errorMsg && (errorMsg.code === 6012 || errorMsg.code === 1002 || errorMsg.code === 6001)) {
-        if (retryCount < MAX_RETRIES) {
-          retryCount++;
-          console.log("Auth or manifest error, reloading stream...");
-          setTimeout(() => {
-            player.unload().then(() => loadStream()).catch(e=>console.warn);
-          }, 2000);
-        }
+    // Attempt to load
+    try {
+      await loadStream(player, video);
+    } catch(error) {
+      console.error("Initial load failed:", error);
+      // Try alternative: directly append token to manifest URL
+      try {
+        const altUrl = CONFIG.streamUrl + (CONFIG.streamUrl.includes('?') ? '&' : '?') + "__hdnea__=" + encodeURIComponent(HDNEA_VALUE);
+        console.log("Trying alternative URL with token");
+        await player.load(altUrl);
+        retryCount = 0;
+        hideLoading();
+      } catch(altError) {
+        hideLoading();
+        showErrorToast("Unable to play stream. The link may have expired or require updated credentials.");
+        console.error("Both load attempts failed:", altError);
       }
-    });
+    }
     
-    // Start loading the stream with our direct cookie
-    await loadStream();
-    
-    // Additional: Keep-alive / prevent sleep (optional but good for streaming)
-    let keepAliveInterval = null;
-    if (navigator.wakeLock) {
+    // Wake lock to keep screen on
+    if ('wakeLock' in navigator) {
       let wakeLock = null;
       const requestWakeLock = async () => {
         try {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log("Wake Lock active");
-        } catch(err) { console.warn("Wake Lock not supported:", err); }
+        } catch(err) { console.log("Wake lock not supported"); }
       };
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && wakeLock === null) {
-          requestWakeLock();
-        } else if (document.visibilityState === 'hidden' && wakeLock) {
+        if (document.visibilityState === 'visible' && !wakeLock) requestWakeLock();
+        else if (document.visibilityState === 'hidden' && wakeLock) {
           wakeLock.release().then(() => wakeLock = null);
         }
       });
       requestWakeLock();
     }
     
-    // Cleanup on page unload
+    // Cleanup
     window.addEventListener('beforeunload', () => {
-      if (player) player.destroy();
+      if(player) player.destroy();
+    });
+    
+    // Also handle video element's own errors
+    video.addEventListener('error', (e) => {
+      console.error("Video element error:", e);
+      hideLoading();
     });
   });
 })();
