@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>IPTV Channel Player - DASH Stream Processor</title>
+    <title>M3U Playlist Processor | IPTV Stream Converter</title>
     <style>
         * {
             margin: 0;
@@ -12,10 +12,10 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #0b1120 0%, #19223c 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px 20px;
         }
 
         .container {
@@ -23,138 +23,164 @@
             margin: 0 auto;
         }
 
-        /* Header */
+        /* header & cards */
         .header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 24px 32px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.4);
         }
 
         h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #E0F2FE, #A78BFA);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
         }
 
-        .subtitle {
-            color: #666;
-            font-size: 14px;
+        .sub {
+            color: #94a3b8;
+            margin-top: 8px;
+            font-size: 0.9rem;
         }
 
-        /* Controls */
-        .controls {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 20px 0 10px;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .input-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 12px;
+            flex: 2;
+            min-width: 260px;
         }
 
         .input-group input {
             flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
+            padding: 12px 18px;
+            border-radius: 60px;
+            border: 1px solid #2d3a5e;
+            background: #0f172ad9;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
         }
 
         .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139,92,246,0.3);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(95deg, #3b2b6b, #6d28d9);
             border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
+            padding: 10px 24px;
+            border-radius: 40px;
             font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+            box-shadow: 0 12px 20px -8px #4c1d95;
         }
 
-        button:active {
-            transform: translateY(0);
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #8b5cf6;
+            color: #c4b5fd;
         }
 
-        /* Video Player */
-        .player-container {
-            background: black;
-            border-radius: 15px;
+        .stats {
+            background: #0f172a80;
+            border-radius: 60px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            color: #cbd5e6;
+        }
+
+        /* player section */
+        .player-section {
+            background: #000000aa;
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            margin-bottom: 32px;
             overflow: hidden;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
+            border: 1px solid #334155;
         }
 
         video {
             width: 100%;
-            height: auto;
-            max-height: 500px;
-            background: black;
+            max-height: 480px;
+            background: #030712;
+            display: block;
         }
 
-        .no-channel {
-            text-align: center;
-            padding: 60px;
-            color: white;
-            background: rgba(0,0,0,0.7);
+        .now-playing {
+            padding: 12px 20px;
+            background: #111827dd;
+            color: #e2e8f0;
+            font-weight: 500;
+            border-top: 1px solid #2d3a5e;
         }
 
-        /* Channel Grid */
+        /* channel grid */
         .channel-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
+            gap: 16px;
             margin-top: 20px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 6px 4px 12px 4px;
         }
 
         .channel-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
+            background: #1e293bb3;
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 12px 16px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+            border: 1px solid #334155;
         }
 
         .channel-card:hover {
+            background: #2d3a5ecc;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-
-        .channel-card.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            border-color: #a78bfa;
         }
 
         .channel-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             object-fit: cover;
-            background: #f0f0f0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
         }
 
         .channel-info {
@@ -163,334 +189,408 @@
 
         .channel-name {
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
+            color: #f1f5f9;
+            font-size: 0.95rem;
         }
 
         .channel-group {
-            font-size: 11px;
-            color: #888;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .channel-card.active .channel-group {
-            color: rgba(255,255,255,0.8);
-        }
-
-        /* Status */
-        .status {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            font-family: monospace;
+        .status-log {
+            background: #0a0f1cd9;
+            border-radius: 20px;
+            padding: 14px 20px;
+            margin-top: 24px;
+            font-family: 'Monaco', monospace;
             font-size: 12px;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
+            color: #b9c3db;
+            border: 1px solid #2d3a5e;
         }
 
-        .status-entry {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-            color: #333;
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 0.5px solid #2d3a5e;
+            font-family: monospace;
         }
 
-        .status-entry.error {
-            color: #e74c3c;
+        .log-success { color: #4ade80; }
+        .log-warn { color: #facc15; }
+        .log-error { color: #f87171; }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .status-entry.success {
-            color: #27ae60;
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: white;
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 10px;
         }
-
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top: 3px solid white;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        ::-webkit-scrollbar-thumb {
+            background: #5b21b6;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📺 IPTV DASH Stream Processor</h1>
-            <div class="subtitle">Load and play DRM-protected DASH streams with automatic key injection</div>
-        </div>
-
-        <div class="controls">
+<div class="container">
+    <div class="header">
+        <h1>📡 M3U to DASH Proxy Processor</h1>
+        <div class="sub">Extracts keys, cookies, and builds proxy URLs from remote M3U playlist (Clearkey + hdnea)</div>
+        <div class="toolbar">
             <div class="input-group">
-                <input type="text" id="inputUrl" placeholder="Stream JSON URL" value="https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u">
-                <input type="text" id="dashProxy" placeholder="DASH Proxy URL" value="https://jiotvplyr.pages.dev/?url=">
-                <button onclick="loadChannels()">🚀 Load Channels</button>
+                <input type="text" id="m3uUrl" value="https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u" placeholder="M3U playlist URL">
+                <input type="text" id="proxyBase" value="https://your-proxy.com/play?mpd=" placeholder="DASH Proxy Base (with ?mpd=)">
             </div>
-            <div style="font-size: 12px; color: #666;">
-                💡 Tip: The JSON should contain channels with fields: url, kid, key, group_title, tvg_logo, channel_name
-            </div>
+            <button id="loadBtn">🚀 Load & Process M3U</button>
+            <button id="downloadBtn" class="btn-outline">💾 Download Output JSON</button>
         </div>
-
-        <div class="player-container" id="playerContainer">
-            <video id="videoPlayer" controls></video>
-        </div>
-
-        <div class="channel-grid" id="channelGrid">
-            <div class="loading">
-                <div class="spinner"></div>
-                <div>Enter URL and click "Load Channels" to start</div>
-            </div>
-        </div>
-
-        <div class="status" id="status">
-            <div class="status-entry">💡 Ready to load channels...</div>
+        <div class="flex-between">
+            <div class="stats" id="statsArea">⚡ Ready — enter M3U URL</div>
+            <div class="stats" id="counterStats">📺 0 channels</div>
         </div>
     </div>
 
-    <!-- Include DASH.js for playback -->
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <!-- video player panel -->
+    <div class="player-section">
+        <video id="dashPlayer" controls playsinline></video>
+        <div class="now-playing" id="nowPlaying">🎬 Select a channel to play</div>
+    </div>
 
-    <script>
-        let currentChannels = [];
-        let player;
+    <!-- channels grid -->
+    <div id="channelGrid" class="channel-grid">
+        <div style="text-align:center; padding:40px; color:#94a3b8;">✨ Click "Load & Process" to parse the remote M3U playlist</div>
+    </div>
 
-        // Initialize DASH player
-        function initPlayer() {
-            if (player) {
-                player.reset();
-            }
-            const video = document.getElementById('videoPlayer');
-            player = dashjs.MediaPlayer().create();
-            player.initialize(video, null, true);
-            player.updateSettings({
-                'streaming': {
-                    'abandonLoadTimeout': 10000,
-                    'delayPlaybackAfterInit': 2000
-                }
-            });
-            return player;
+    <!-- status console -->
+    <div class="status-log" id="logPanel">
+        <div class="log-entry">🟢 Ready. Use default M3U or paste your own.</div>
+    </div>
+</div>
+
+<!-- dash.js for playback -->
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+
+<script>
+    // ---------- GLOBALS ----------
+    let processedChannels = [];      // array of { name, id, logo, group, link, kid, key, originalUrl }
+    let dashPlayer = null;
+    let currentProxyBase = "";
+
+    // helper: add status logs
+    function addLog(msg, type = 'info') {
+        const logDiv = document.getElementById('logPanel');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const time = new Date().toLocaleTimeString();
+        let prefix = "ℹ️";
+        if (type === 'success') prefix = "✅";
+        else if (type === 'warn') prefix = "⚠️";
+        else if (type === 'error') prefix = "❌";
+        entry.innerHTML = `<span style="color:#7e8ba3;">[${time}]</span> ${prefix} ${msg}`;
+        if (type === 'success') entry.style.color = '#bbf7d0';
+        else if (type === 'error') entry.style.color = '#fecaca';
+        logDiv.appendChild(entry);
+        entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (logDiv.children.length > 80) logDiv.removeChild(logDiv.firstChild);
+    }
+
+    // update channel counter and grid
+    function updateUI() {
+        const grid = document.getElementById('channelGrid');
+        const counterSpan = document.getElementById('counterStats');
+        if (!processedChannels.length) {
+            grid.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">📭 No channels processed. Load M3U first.</div>`;
+            counterSpan.innerText = `📺 0 channels`;
+            return;
         }
-
-        // Main processing function
-        async function processStreams(INPUT_URL, DASH_PROXY) {
-            addStatus(`📥 Fetching remote stream.json from ${https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u}...`, 'info');
-            
-            try {
-                const res = await fetch(INPUT_URL);
-                if (!res.ok) {
-                    throw new Error(`Failed to fetch JSON: ${res.status}`);
-                }
-                const raw = await res.json();
-
-                let channels;
-                if (Array.isArray(raw)) {
-                    channels = Object.entries({ ...raw });
-                } else {
-                    channels = Object.entries(raw);
-                }
-                
-                addStatus(`🔄 Processing ${channels.length} channels...`, 'info');
-
-                const result = channels
-                    .filter(([id, channel]) => {
-                        if (!channel.url) {
-                            addStatus(`⚠️ Skipping id=${id} — no url field`, 'warn');
-                            return false;
-                        }
-                        return true;
-                    })
-                    .map(([id, channel]) => {
-                        const { kid, key, url, group_title, tvg_logo, channel_name } = channel;
-
-                        const [mpdUrl, queryString] = url.split("?");
-                        const hdneaMatch = queryString ? queryString.match(/(hdnea=[^&]+)/) : null;
-                        const cookie = hdneaMatch ? hdneaMatch[1] : "";
-
-                        const bpkMatch = mpdUrl.match(/\/bpk-tv\/([^/]+)\//);
-                        let rawName = bpkMatch ? bpkMatch[1] : String(id);
-                        rawName = rawName.replace("_BTS", "");
-
-                        const displayName = channel_name || rawName.replace(/_/g, " ");
-
-                        let playerUrl = DASH_PROXY + encodeURIComponent(mpdUrl) +
-                            `&keyId=${encodeURIComponent(kid)}` +
-                            `&key=${encodeURIComponent(key)}`;
-                        
-                        if (cookie) {
-                            playerUrl += `&cookie=${encodeURIComponent(cookie)}`;
-                        }
-
-                        addStatus(`✅ ${displayName} (id: ${id}) | kid: ${kid}`, 'success');
-
-                        return {
-                            name: displayName,
-                            id: id,
-                            logo: tvg_logo,
-                            group: group_title,
-                            link: playerUrl,
-                            originalUrl: url,
-                            kid: kid
-                        };
-                    });
-
-                addStatus(`✨ Successfully processed ${result.length} channels!`, 'success');
-                return result;
-
-            } catch (error) {
-                addStatus(`❌ Error: ${error.message}`, 'error');
-                throw error;
-            }
-        }
-
-        // Display channels in grid
-        function displayChannels(channels) {
-            const grid = document.getElementById('channelGrid');
-            
-            if (!channels || channels.length === 0) {
-                grid.innerHTML = '<div class="loading"><div>No channels found</div></div>';
-                return;
-            }
-
-            grid.innerHTML = channels.map((channel, index) => `
-                <div class="channel-card" onclick="playChannel(${index})">
-                    ${channel.logo ? `<img class="channel-logo" src="${channel.logo}" onerror="this.src='https://via.placeholder.com/50x50?text=No+Logo'">` : 
-                                      `<div class="channel-logo" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 20px;">📺</div>`}
-                    <div class="channel-info">
-                        <div class="channel-name">${escapeHtml(channel.name)}</div>
-                        <div class="channel-group">${escapeHtml(channel.group || 'No Group')}</div>
-                    </div>
+        counterSpan.innerText = `📺 ${processedChannels.length} channels ready`;
+        grid.innerHTML = processedChannels.map((ch, idx) => `
+            <div class="channel-card" data-index="${idx}">
+                <div class="channel-logo">
+                    ${ch.logo ? `<img src="${ch.logo}" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='📺'">` : '📺'}
                 </div>
-            `).join('');
-        }
-
-        // Play selected channel
-        function playChannel(index) {
-            const channel = currentChannels[index];
-            if (!channel) return;
-
-            addStatus(`🎬 Playing: ${channel.name}`, 'info');
-            
-            // Update active state in UI
-            document.querySelectorAll('.channel-card').forEach((card, i) => {
-                if (i === index) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-
-            // Initialize or reset player
-            if (!player) {
-                initPlayer();
-            } else {
-                player.attachSource(null);
-            }
-
-            // Load the stream
-            player.attachSource(channel.link);
-            
-            // Optional: Add custom headers if needed
-            player.setXhrWithCredentialsForType('', true);
-            
-            // Auto-play attempt
-            const video = document.getElementById('videoPlayer');
-            video.play().catch(e => {
-                addStatus(`⚠️ Auto-play prevented: ${e.message}. Click play button to start.`, 'warn');
-            });
-        }
-
-        // Helper functions
-        function addStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            const entry = document.createElement('div');
-            entry.className = `status-entry ${type === 'error' ? 'error' : (type === 'success' ? 'success' : '')}`;
-            
-            const time = new Date().toLocaleTimeString();
-            let icon = 'ℹ️';
-            if (type === 'error') icon = '❌';
-            if (type === 'success') icon = '✅';
-            if (type === 'warn') icon = '⚠️';
-            
-            entry.textContent = `${time} ${icon} ${message}`;
-            statusDiv.appendChild(entry);
-            entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
-            // Limit status entries
-            while (statusDiv.children.length > 100) {
-                statusDiv.removeChild(statusDiv.firstChild);
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text || '';
-            return div.innerHTML;
-        }
-
-        // Main load function
-        async function loadChannels() {
-            const inputUrl = document.getElementById('inputUrl').value;
-            const dashProxy = document.getElementById('dashProxy').value;
-            
-            if (!inputUrl || !dashProxy) {
-                addStatus('Please provide both URL and DASH Proxy', 'error');
-                return;
-            }
-
-            // Clear previous status
-            document.getElementById('status').innerHTML = '';
-            addStatus('🚀 Starting channel processing...', 'info');
-            
-            // Show loading in grid
-            document.getElementById('channelGrid').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Loading channels...</div>
+                <div class="channel-info">
+                    <div class="channel-name">${escapeHtml(ch.name)}</div>
+                    <div class="channel-group">${escapeHtml(ch.group || 'Uncategorized')}</div>
                 </div>
-            `;
+            </div>
+        `).join('');
 
-            try {
-                // Process the streams
-                currentChannels = await processStreams(inputUrl, dashProxy);
-                
-                // Display in grid
-                displayChannels(currentChannels);
-                
-                addStatus(`📊 Total channels loaded: ${currentChannels.length}`, 'success');
-                
-                // Auto-play first channel if available
-                if (currentChannels.length > 0) {
-                    addStatus('🎯 Auto-playing first channel...', 'info');
-                    playChannel(0);
-                }
-                
-            } catch (error) {
-                addStatus(`Failed to load channels: ${error.message}`, 'error');
-                document.getElementById('channelGrid').innerHTML = `
-                    <div class="loading">
-                        <div>❌ Failed to load channels</div>
-                        <div style="font-size: 12px; margin-top: 10px;">${error.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            initPlayer();
-            addStatus('🎥 Player ready. Enter your stream.json URL and proxy to begin.', 'success');
+        // attach click events
+        document.querySelectorAll('.channel-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const idx = card.getAttribute('data-index');
+                if (idx !== null) playChannel(parseInt(idx));
+            });
         });
-    </script>
+    }
+
+    function escapeHtml(str) { return (str || '').replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // play channel using dash.js proxy url
+    function playChannel(index) {
+        const ch = processedChannels[index];
+        if (!ch || !ch.link) {
+            addLog(`Cannot play ${ch?.name}: missing proxy URL`, 'error');
+            return;
+        }
+        const videoEl = document.getElementById('dashPlayer');
+        if (!dashPlayer) {
+            dashPlayer = dashjs.MediaPlayer().create();
+            dashPlayer.initialize(videoEl, null, true);
+            dashPlayer.updateSettings({
+                streaming: { delayPlaybackAfterInit: 1200, abandonLoadTimeout: 8000 }
+            });
+        } else {
+            dashPlayer.attachSource(null);
+        }
+        addLog(`🎥 Playing: ${ch.name}`, 'success');
+        document.getElementById('nowPlaying').innerHTML = `▶️ NOW: ${ch.name}  |  Group: ${ch.group || '—'}`;
+        dashPlayer.attachSource(ch.link);
+        videoEl.play().catch(e => addLog(`Autoplay blocked: ${e.message}`, 'warn'));
+    }
+
+    // ---------- CORE PARSER: M3U to JSON (like main() but reading m3u lines) ----------
+    async function parseM3UAndConvert(m3uUrl, proxyBase) {
+        addLog(`📡 Fetching M3U playlist: ${m3uUrl}`, 'info');
+        const response = await fetch(m3uUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status} - cannot fetch M3U`);
+        const m3uText = await response.text();
+        addLog(`✅ M3U fetched, size ${m3uText.length} chars`, 'success');
+
+        const lines = m3uText.split(/\r?\n/);
+        let channels = [];
+        let currentExtInf = null;
+        let currentGroup = null;
+        let currentLogo = null;
+        let currentName = null;
+        let currentTvgId = null;
+        let currentKey = null;          // clearkey from #KODIPROP:inputstream.adaptive.license_key=KEY
+        let currentCookie = null;        // extracted from #EXTHTTP:{"cookie":"..."}
+        let currentUrl = null;
+
+        // helper: extract license_key (format: "KID:KEY")
+        function extractKeyFromLine(line) {
+            if (line.includes('#KODIPROP:inputstream.adaptive.license_key')) {
+                const match = line.match(/license_key=([a-f0-9]+:[a-f0-9]+)/i);
+                if (match && match[1]) return match[1];
+                // also support plain key after '='
+                const altMatch = line.match(/license_key=([^ \n]+)/);
+                if (altMatch && altMatch[1].includes(':')) return altMatch[1];
+            }
+            return null;
+        }
+
+        // extract hdnea cookie from EXTHTTP line: {"cookie":"__hdnea__=st=...~hmac=..."}
+        function extractCookieFromExthttp(line) {
+            if (line.includes('#EXTHTTP')) {
+                try {
+                    const jsonStr = line.replace('#EXTHTTP:', '').trim();
+                    const parsed = JSON.parse(jsonStr);
+                    if (parsed.cookie && parsed.cookie.includes('__hdnea__')) return parsed.cookie;
+                    if (parsed['cookie'] && parsed['cookie'].includes('hdnea')) return parsed.cookie;
+                } catch(e) { /* ignore */ }
+                // fallback regex
+                const cookieMatch = line.match(/cookie\\?":\\?"([^"]+)/);
+                if (cookieMatch) return cookieMatch[1];
+            }
+            return null;
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+
+            if (line.startsWith('#EXTINF')) {
+                // parse #EXTINF:-1 tvg-id="..." group-title="..." tvg-logo="..." ,ChannelName
+                currentExtInf = line;
+                currentGroup = null;
+                currentLogo = null;
+                currentName = null;
+                currentTvgId = null;
+                // extract group-title
+                const groupMatch = line.match(/group-title="([^"]+)"/);
+                if (groupMatch) currentGroup = groupMatch[1];
+                const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                if (logoMatch) currentLogo = logoMatch[1];
+                const tvgIdMatch = line.match(/tvg-id="([^"]+)"/);
+                if (tvgIdMatch) currentTvgId = tvgIdMatch[1];
+                // channel name after last comma
+                const parts = line.split(',');
+                if (parts.length > 1) currentName = parts.slice(1).join(',').trim();
+                else currentName = "Unknown";
+                continue;
+            }
+
+            if (line.startsWith('#KODIPROP:inputstream.adaptive.license_key')) {
+                const keyRaw = extractKeyFromLine(line);
+                if (keyRaw) currentKey = keyRaw;
+                continue;
+            }
+
+            if (line.includes('#EXTHTTP')) {
+                const cookieRaw = extractCookieFromExthttp(line);
+                if (cookieRaw) currentCookie = cookieRaw;
+                continue;
+            }
+
+            // the URL line (starts with http or https)
+            if (line.startsWith('http://') || line.startsWith('https://')) {
+                currentUrl = line;
+                // now we have all metadata: assemble channel object
+                if (currentUrl && currentName) {
+                    // extract kid & key from license_key (format "kid:key")
+                    let kid = null, key = null;
+                    if (currentKey && currentKey.includes(':')) {
+                        const [kidPart, keyPart] = currentKey.split(':');
+                        kid = kidPart;
+                        key = keyPart;
+                    } else if (currentKey && !currentKey.includes(':')) {
+                        // fallback: some lines might have key only, but we keep as key placeholder
+                        key = currentKey;
+                        kid = currentTvgId || 'unknown';
+                    }
+
+                    // ---- MPD url processing: split query params and extract hdnea cookie if not present already ----
+                    let mpdUrl = currentUrl;
+                    let cookieParam = currentCookie || "";
+                    // Also try to extract hdnea from the URL query (if exists)
+                    const [baseUrl, queryString] = currentUrl.split('?');
+                    if (queryString) {
+                        const hdneaMatch = queryString.match(/(__hdnea__=[^&]+)/);
+                        if (hdneaMatch && !cookieParam) cookieParam = hdneaMatch[1];
+                        // clean base mpd url
+                        mpdUrl = baseUrl;
+                    }
+
+                    // build final proxy URL exactly as original main() style:
+                    // DASH_PROXY + encodeURIComponent(mpdUrl) + &keyId=${kid} + &key=${key} + optional &cookie
+                    let playerUrl = proxyBase + encodeURIComponent(mpdUrl) +
+                        `&keyId=${encodeURIComponent(kid || '')}` +
+                        `&key=${encodeURIComponent(key || '')}`;
+                    if (cookieParam) {
+                        playerUrl += `&cookie=${encodeURIComponent(cookieParam)}`;
+                    }
+
+                    // display name cleanup (optional)
+                    let displayName = currentName;
+                    // try to extract from bpk-tv folder like original logic (optional but nice)
+                    const bpkMatch = mpdUrl.match(/\/bpk-tv\/([^/]+)\//);
+                    if (bpkMatch && !displayName) {
+                        let raw = bpkMatch[1].replace(/_BTS/g, '').replace(/_/g, ' ');
+                        displayName = raw;
+                    }
+
+                    const channelObj = {
+                        name: displayName,
+                        id: currentTvgId || `ch_${Date.now()}_${i}`,
+                        logo: currentLogo || '',
+                        group: currentGroup || 'General',
+                        link: playerUrl,
+                        kid: kid,
+                        key: key,
+                        originalUrl: currentUrl,
+                        cookieUsed: cookieParam
+                    };
+                    channels.push(channelObj);
+                    addLog(`📺 ${displayName} | kid:${kid ? kid.substring(0,8)+'…' : 'none'} | group:${currentGroup || '-'}`, 'success');
+                }
+                // reset per-channel accumulators
+                currentExtInf = null; currentGroup = null; currentLogo = null; currentName = null;
+                currentKey = null; currentCookie = null; currentUrl = null; currentTvgId = null;
+            }
+        }
+
+        if (channels.length === 0) throw new Error('No valid channel entries found in M3U (missing EXTINF+URL pairs)');
+        addLog(`🎉 Parsing complete: ${channels.length} channels built with proxy URLs`, 'success');
+        return channels;
+    }
+
+    // Main action: load M3U, apply transformation, update UI
+    async function loadAndProcess() {
+        const m3uUrl = document.getElementById('m3uUrl').value.trim();
+        const proxyBase = document.getElementById('proxyBase').value.trim();
+        if (!m3uUrl) { addLog('Please provide M3U playlist URL', 'error'); return; }
+        if (!proxyBase) { addLog('Please provide DASH Proxy base URL (e.g., https://proxy/play?mpd=)', 'error'); return; }
+        currentProxyBase = proxyBase;
+        document.getElementById('statsArea').innerHTML = '⏳ Processing M3U...';
+        try {
+            const channels = await parseM3UAndConvert(m3uUrl, proxyBase);
+            processedChannels = channels;
+            updateUI();
+            document.getElementById('statsArea').innerHTML = `✅ Last loaded: ${new Date().toLocaleTimeString()} | ${channels.length} streams`;
+            if (channels.length > 0) {
+                addLog(`✨ Ready. First channel: "${channels[0].name}" — click to play`, 'success');
+            }
+        } catch (err) {
+            addLog(`❌ Failed: ${err.message}`, 'error');
+            document.getElementById('statsArea').innerHTML = '⚠️ Load error';
+            processedChannels = [];
+            updateUI();
+        }
+    }
+
+    // Download output as JSON (the same format as main() result array)
+    function downloadOutput() {
+        if (!processedChannels.length) {
+            addLog('No processed channels to download. Load M3U first.', 'warn');
+            return;
+        }
+        const exportData = processedChannels.map(ch => ({
+            name: ch.name,
+            id: ch.id,
+            logo: ch.logo,
+            group: ch.group,
+            link: ch.link,
+            kid: ch.kid,
+            key: ch.key,
+            // optional metadata for reference
+            original_url: ch.originalUrl
+        }));
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `m3u_output_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        addLog(`📥 Exported ${processedChannels.length} channels to JSON`, 'success');
+    }
+
+    // Initialize dash player stub
+    function initPlayerOnLoad() {
+        const video = document.getElementById('dashPlayer');
+        dashPlayer = dashjs.MediaPlayer().create();
+        dashPlayer.initialize(video, null, false);
+        dashPlayer.updateSettings({ streaming: { delayPlaybackAfterInit: 1000 } });
+    }
+
+    // attach events
+    document.getElementById('loadBtn').addEventListener('click', loadAndProcess);
+    document.getElementById('downloadBtn').addEventListener('click', downloadOutput);
+    window.addEventListener('DOMContentLoaded', () => {
+        initPlayerOnLoad();
+        // prefill default proxy example (user must edit according to actual proxy)
+        document.getElementById('proxyBase').value = "https://jiotvplyr.pages.dev/?url=";
+        addLog('💡 Set your DASH_PROXY base URL (must accept &keyId= &key= &cookie= params)', 'info');
+    });
+</script>
 </body>
 </html>
