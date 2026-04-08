@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Plyr + HLS.js - Advanced Video Player</title>
+
+    <!-- Plyr CSS (Core styles) -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0a0f1e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem;
+        }
+
+        .player-container {
+            max-width: 1280px;
+            width: 100%;
+            background: #000000;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+        }
+
+        /* plyr custom skin overrides for better dark theme */
+        .plyr--video {
+            border-radius: 0;
+        }
+
+        .plyr__control--overlaid {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-bar {
+            background: rgba(12, 18, 28, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 0.9rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        .stream-badge {
+            background: #ef4444;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 16px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .note {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.75rem;
+            }
+            .info-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="player-container">
+    <div class="video-wrapper">
+        <!-- 
+            Plyr video element:
+            - 'crossorigin' is essential for proper CORS handling and token/cookie forwarding.
+            - 'playsinline' prevents mobile fullscreen auto-behavior.
+            - Poster can be added if needed.
+        -->
+        <video id="plyr-hls-player" controls playsinline crossorigin="anonymous" poster="https://assets.codepen.io/32795/fallback-poster.jpg">
+            <!-- Captions can be added here later if needed -->
+            <track kind="captions" label="No captions" disabled>
+        </video>
+    </div>
+    <div class="info-bar">
+        <div class="stream-badge">LIVE STREAM · HLS</div>
+        <div class="tech-stack">
+            <span>🎬 Plyr 3.7.8</span>
+            <span>⚡ hls.js</span>
+            <span>📡 .m3u8 adaptive</span>
+        </div>
+        <div class="note">
+            ⚡ Supports quality selector & custom headers
+        </div>
+    </div>
+</div>
+
+<!-- 1. Plyr JS -->
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+<!-- 2. Hls.js (latest stable) -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+    (function() {
+        // ------------------------------------------------------------------
+        // 🔥 SET YOUR M3U8 URL HERE (replace with your actual stream)
+        // ------------------------------------------------------------------
+        const M3U8_SOURCE = "https://vod01.akt.hotstar-cdn.net/videos/cricket/inallow-ipl-2026-1540066073/1540066074/b8fd04046ec040d59e857dfaa40d30d4/index_7.m3u8";
+        
+        // ------------------------------------------------------------------
+        // OPTIONAL: If your stream requires authentication tokens / headers
+        // Example: some streams need 'Referer' or 'Authorization' header.
+        // WARNING: Custom headers require the server to allow CORS.
+        // For Hotstar-like tokens, you'll need valid session cookies.
+        // ------------------------------------------------------------------
+        const CUSTOM_HEADERS = {
+            // "Authorization": "Bearer YOUR_TOKEN_HERE",
+            // "Referer": "https://www.hotstar.com/",
+            // "Origin": "https://www.hotstar.com"
+        };
+
+        // DOM elements
+        const videoElement = document.querySelector('#plyr-hls-player');
+        if (!videoElement) {
+            console.error("Video element not found!");
+            return;
+        }
+
+        let player = null;      // Plyr instance
+        let hls = null;         // Hls.js instance
+
+        // Helper: update plyr quality options dynamically when HLS manifest is parsed
+        function setupQualitySelector(currentHls, plyrInstance) {
+            if (!currentHls || !plyrInstance) return;
+
+            // Wait for manifest to be fully parsed to get available quality levels
+            currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                const levels = currentHls.levels;
+                if (!levels || levels.length === 0) {
+                    console.warn("No quality levels found in manifest.");
+                    return;
+                }
+
+                // Extract unique heights (e.g., 360, 480, 720, 1080)
+                const qualityOptions = levels.map(level => level.height);
+                // Remove duplicates just in case
+                const uniqueQualities = [...new Set(qualityOptions)];
+                // Sort descending (1080p first looks nice)
+                uniqueQualities.sort((a, b) => b - a);
+
+                // Add 0 for "Auto" mode (adaptive bitrate)
+                const finalQualities = [0, ...uniqueQualities];
+                
+                console.log(`🎚️ Available qualities: ${uniqueQualities.join(', ')}p | Auto mode enabled`);
+
+                // Define the new quality option object for Plyr
+                const qualityConfig = {
+                    default: 0,     // 0 = auto (adaptive)
+                    options: finalQualities,
+                    forced: true,   // Replace native quality menu with custom HLS control
+                    onChange: (newQuality) => {
+                        if (!currentHls) return;
+                        if (newQuality === 0) {
+                            // Enable auto quality (ABR)
+                            currentHls.currentLevel = -1;
+                            console.log("🔄 Quality switched to: AUTO (Adaptive)");
+                        } else {
+                            // Find level index matching the selected height
+                            const levelIndex = currentHls.levels.findIndex(level => level.height === newQuality);
+                            if (levelIndex !== -1) {
+                                currentHls.currentLevel = levelIndex;
+                                console.log(`🎛️ Quality switched to: ${newQuality}p`);
+                            } else {
+                                console.warn(`Quality ${newQuality}p not available`);
+                            }
+                        }
+                    }
+                };
+
+                // Extend Plyr options with quality selector and i18n for "Auto" label
+                const plyrOptions = {
+                    quality: qualityConfig,
+                    i18n: {
+                        qualityLabel: {
+                            0: 'Auto',
+                        },
+                        restart: 'Restart',
+                        rewind: 'Rewind {seektime}s',
+                        play: 'Play',
+                        pause: 'Pause',
+                        fastForward: 'Forward {seektime}s',
+                        seek: 'Seek',
+                        seekLabel: '{currentTime} of {duration}',
+                        played: 'Played',
+                        buffered: 'Buffered',
+                        currentTime: 'Current time',
+                        duration: 'Duration',
+                        volume: 'Volume',
+                        mute: 'Mute',
+                        unmute: 'Unmute',
+                        enableCaptions: 'Enable captions',
+                        disableCaptions: 'Disable captions',
+                        download: 'Download',
+                        enterFullscreen: 'Enter fullscreen',
+                        exitFullscreen: 'Exit fullscreen',
+                        frameTitle: 'Player for {title}',
+                        captions: 'Captions',
+                        settings: 'Settings',
+                        menuBack: 'Go back to previous menu',
+                        speed: 'Speed',
+                        normal: 'Normal',
+                        quality: 'Quality',
+                        loop: 'Loop'
+                    }
+                };
+
+                // Re-configure Plyr with new options (must destroy old instance first)
+                if (plyrInstance && typeof plyrInstance.destroy === 'function') {
+                    plyrInstance.destroy();
+                }
+                // Create fresh Plyr with quality selector
+                const newPlayer = new Plyr(videoElement, plyrOptions);
+                player = newPlayer;
+
+                // Sync the HLS instance back to global
+                window.hlsInstance = currentHls;
+
+                // Optional: update quality badge when level changes
+                currentHls.on(Hls.Events.LEVEL_SWITCHED, function(evt, data) {
+                    const level = currentHls.levels[data.level];
+                    if (level && player && player.elements && player.elements.container) {
+                        const autoActive = (currentHls.currentLevel === -1);
+                        if (!autoActive && level.height) {
+                            console.log(`📺 Current quality: ${level.height}p`);
+                        } else if (autoActive) {
+                            console.log(`📺 Current quality: AUTO (${level ? level.height + 'p' : 'unknown'})`);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize HLS playback + Plyr
+        function initHlsPlayer() {
+            // Check if HLS is natively supported by the browser (Safari supports HLS natively)
+            if (Hls.isSupported()) {
+                // ---- Using hls.js for full control & quality selector ----
+                hls = new Hls({
+                    enableWorker: true,        // Use web workers for better performance
+                    lowLatencyMode: true,      // Reduce latency for live streams
+                    maxBufferLength: 30,       // Balanced buffering
+                    maxMaxBufferLength: 60,
+                    startPosition: -1,         // Start from live edge or beginning
+                    debug: false,              // Set to true for verbose logs
+                });
+
+                // If custom headers are required (e.g., authorization token)
+                if (Object.keys(CUSTOM_HEADERS).length > 0) {
+                    // Override xhr setup to inject custom headers
+                    hls.config.xhrSetup = function(xhr, url) {
+                        for (const [key, value] of Object.entries(CUSTOM_HEADERS)) {
+                            xhr.setRequestHeader(key, value);
+                        }
+                    };
+                }
+
+                // Bind HLS to video element
+                hls.attachMedia(videoElement);
+                
+                // Load the m3u8 stream
+                hls.loadSource(M3U8_SOURCE);
+                
+                // When HLS fails, show error
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error("Fatal network error — trying to recover");
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error("Fatal media error — attempting recovery");
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                console.error("Fatal error — cannot recover", data);
+                                // You can optionally destroy and show fallback
+                                break;
+                        }
+                    }
+                });
+
+                // Once manifest is parsed, setup quality selector and initialize Plyr
+                hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                    console.log("✅ HLS manifest parsed, initializing Plyr with quality selector.");
+                    // Create temporary Plyr instance without quality (we'll replace it inside setupQualitySelector)
+                    const tempPlayer = new Plyr(videoElement, {});
+                    setupQualitySelector(hls, tempPlayer);
+                });
+
+                // Make hls globally accessible for debugging (optional)
+                window.hls = hls;
+            } 
+            else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                // Fallback for Safari (native HLS support)
+                console.log("📱 Using native HLS playback (Safari). Quality selector limited.");
+                videoElement.src = M3U8_SOURCE;
+                // For Safari, we still initialize Plyr without custom quality (native controls fallback)
+                player = new Plyr(videoElement, {
+                    // Native HLS doesn't support quality switching via hls.js, but basic plyr works
+                    controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']
+                });
+            } 
+            else {
+                console.error("❌ HLS is not supported in this browser.");
+                videoElement.innerHTML = '<source src="fallback.mp4" type="video/mp4">Your browser does not support HLS streaming.';
+            }
+        }
+
+        // Cleanup function to avoid memory leaks
+        function destroyPlayerAndHls() {
+            if (player && typeof player.destroy === 'function') {
+                player.destroy();
+                player = null;
+            }
+            if (hls && typeof hls.destroy === 'function') {
+                hls.destroy();
+                hls = null;
+            }
+        }
+
+        // Start everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            destroyPlayerAndHls(); // Clean any previous instances
+            initHlsPlayer();
+        });
+
+        // Optional: handle page unload to destroy resources
+        window.addEventListener('beforeunload', () => {
+            if (player) player.destroy();
+            if (hls) hls.destroy();
+        });
+    })();
+</script>
+</body>
+</html>
