@@ -3,492 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>M3U to Encoded Stream Link · JioTV Clearkey Parser</title>
+    <title>IPTV Channel Player - DASH Stream Processor</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: radial-gradient(circle at 10% 20%, #0a0f1e, #060a14);
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem 1.5rem;
-            color: #edf2ff;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .card {
-            background: rgba(12, 20, 35, 0.92);
-            backdrop-filter: blur(2px);
-            border-radius: 2rem;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(66, 153, 225, 0.2);
-            overflow: hidden;
-            transition: all 0.2s;
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .card-header {
-            background: #0b1120;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid #1f2a44;
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
 
-        .card-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(120deg, #b9e0ff, #7c9eff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin: 0;
-            letter-spacing: -0.3px;
+        .subtitle {
+            color: #666;
+            font-size: 14px;
         }
 
-        .card-header p {
-            color: #8ea1c7;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
+        /* Controls */
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .card-body {
-            padding: 2rem;
-        }
-
-        .input-area {
-            background: #070c17;
-            border-radius: 1.5rem;
-            border: 1px solid #253153;
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-
-        .input-label {
+        .input-group {
             display: flex;
-            align-items: center;
             gap: 10px;
-            background: #0e1428;
-            padding: 0.8rem 1.2rem;
-            font-weight: 500;
-            border-bottom: 1px solid #1f2a46;
-            font-size: 0.85rem;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
-        textarea {
-            width: 100%;
-            background: #03070f;
-            border: none;
-            color: #d6e3ff;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.8rem;
-            padding: 1.2rem;
-            resize: vertical;
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
             outline: none;
-            line-height: 1.5;
+            border-color: #667eea;
         }
 
-        textarea:focus {
-            background: #050b15;
-        }
-
-        .action-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            padding: 0.65rem 1.4rem;
-            border-radius: 40px;
-            font-weight: 500;
-            font-size: 0.85rem;
+            padding: 12px 25px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #1e2a46;
-            color: #f0f4ff;
-            border: 1px solid #334164;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            border-color: #3b82f6;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: #3b82f6;
-            transform: scale(1.02);
-        }
-
-        .btn-secondary {
-            background: #1f2a44;
-        }
-
-        .btn-secondary:hover {
-            background: #2a3a60;
-        }
-
-        .result-box {
-            background: #070c1a;
-            border-radius: 1.5rem;
-            border: 1px solid #2e3b5a;
-            margin-top: 1.8rem;
-            overflow: hidden;
-        }
-
-        .result-header {
-            background: #0e1428;
-            padding: 0.9rem 1.2rem;
+            font-size: 14px;
             font-weight: 600;
-            border-bottom: 1px solid #253153;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Video Player */
+        .player-container {
+            background: black;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            background: black;
+        }
+
+        .no-channel {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+        }
+
+        /* Channel Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .channel-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .encoded-link {
-            font-family: 'Fira Code', monospace;
-            font-size: 0.75rem;
-            word-break: break-all;
-            white-space: pre-wrap;
-            background: #02060c;
-            padding: 1.2rem;
-            color: #b9d0ff;
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        .copy-feedback {
-            font-size: 0.7rem;
-            background: #1f2a3a;
-            padding: 4px 10px;
-            border-radius: 30px;
-        }
-
-        .meta-grid {
-            display: flex;
-            flex-wrap: wrap;
+            align-items: center;
             gap: 12px;
-            background: #0a1020;
-            padding: 1rem 1.2rem;
-            border-radius: 1.2rem;
-            margin: 1.2rem 0;
-            font-size: 0.8rem;
         }
 
-        .meta-item {
-            background: #111827;
-            padding: 0.3rem 0.9rem;
-            border-radius: 30px;
-            border-left: 3px solid #3b82f6;
+        .channel-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
 
-        .warning-note {
-            background: #1e1a2a;
-            border-left: 3px solid #f97316;
-            padding: 0.8rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            margin-top: 1rem;
+        .channel-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        @media (max-width: 680px) {
-            .card-body {
-                padding: 1.2rem;
-            }
+        .channel-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .channel-info {
+            flex: 1;
+        }
+
+        .channel-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .channel-group {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .channel-card.active .channel-group {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Status */
+        .status {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .status-entry {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        .status-entry.error {
+            color: #e74c3c;
+        }
+
+        .status-entry.success {
+            color: #27ae60;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h1>📺 M3U → ENCODED STREAM LINK</h1>
-            <p>Paste any M3U entry (EXTINF + KODIPROP + license + cookie + MPD) → get fully percent-encoded URL (whole output encoded) + clearkey params</p>
+    <div class="container">
+        <div class="header">
+            <h1>📺 IPTV DASH Stream Processor</h1>
+            <div class="subtitle">Load and play DRM-protected DASH streams with automatic key injection</div>
         </div>
-        <div class="card-body">
-            <!-- Input area -->
-            <div class="input-area">
-                <div class="input-label">
-                    <span>📄 M3U snippet</span>
-                    <span style="font-size:0.7rem; color:#6c86b0;">(Paste #EXTINF... lines including MPD url)</span>
-                </div>
-                <textarea id="m3uInput" rows="8" placeholder='#EXTINF:-1 tvg-id="3278" group-title="Sports" tvg-logo="https://...",Star Sports 1 Telugu HD
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5
-#EXTVLCOPT:http-user-agent=plaYtv/7.1.3 (Linux;Android 13) ygx/824.1 ExoPlayerLib/824.0
-#EXTHTTP:{"cookie":"__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c"}
-https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?#__hdnea__=...'></textarea>
-            </div>
-            <div class="action-bar">
-                <div>
-                    <button id="parseBtn" class="btn btn-primary">⚡ Generate Encoded Link</button>
-                    <button id="resetExampleBtn" class="btn btn-secondary">📋 Load Example</button>
-                </div>
-                <span style="font-size:0.7rem;">🔑 extracts keyId, key, cookie, manifest</span>
-            </div>
 
-            <!-- dynamic extracted info -->
-            <div id="extractedMeta" class="meta-grid" style="display: none;"></div>
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="inputUrl" placeholder="Stream JSON URL" value="https://example.com/stream.json">
+                <input type="text" id="dashProxy" placeholder="DASH Proxy URL" value="https://your-proxy.com/play?mpd=">
+                <button onclick="loadChannels()">🚀 Load Channels</button>
+            </div>
+            <div style="font-size: 12px; color: #666;">
+                💡 Tip: The JSON should contain channels with fields: url, kid, key, group_title, tvg_logo, channel_name
+            </div>
+        </div>
 
-            <!-- RESULT SECTION: FULL PERCENT-ENCODED OUTPUT -->
-            <div class="result-box" id="resultBox" style="display: none;">
-                <div class="result-header">
-                    <span>🔗 FULLY ENCODED STREAM URL (whole output % encoded)</span>
-                    <button id="copyEncodedBtn" class="btn" style="padding: 0.2rem 1rem; font-size:0.7rem;">📋 Copy Encoded</button>
-                </div>
-                <div class="encoded-link" id="encodedLinkOutput"></div>
-                <div style="padding: 0.7rem 1.2rem; font-size:0.7rem; border-top: 1px solid #253153; background:#0b0f1c;">
-                    ✅ Format: <strong>https%3A%2F%2F...mpd%3F...%26keyId%3D...%26key%3D...%26cookie%3D... (full string URL-encoded)</strong>
-                </div>
-            </div>
+        <div class="player-container" id="playerContainer">
+            <video id="videoPlayer" controls></video>
+        </div>
 
-            <!-- optional raw decoded preview -->
-            <div class="warning-note" id="decodedNote" style="display: none;">
-                💡 <strong>Decoded form (readable):</strong> <span id="decodedPreview"></span>
+        <div class="channel-grid" id="channelGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>Enter URL and click "Load Channels" to start</div>
             </div>
-            <div class="warning-note">
-                🧠 The output is the <strong>whole streaming URL + parameters</strong> encoded with <strong>encodeURIComponent</strong> (percent-encoding). Perfect for passing as a single query param or secure transmission.
-            </div>
+        </div>
+
+        <div class="status" id="status">
+            <div class="status-entry">💡 Ready to load channels...</div>
         </div>
     </div>
-</div>
 
-<script>
-    // Helper: parse M3U text block and extract required fields
-    function parseM3UBlock(rawText) {
-        const lines = rawText.split(/\r?\n/);
-        let manifestUrl = '';
-        let licenseKeyRaw = '';    // format: keyid:key
-        let keyId = '';
-        let key = '';
-        let cookieValue = '';
-        let channelName = '';
+    <!-- Include DASH.js for playback -->
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            // extract EXTINF channel name
-            if (line.startsWith('#EXTINF')) {
-                const match = line.match(/,([^,]+)$/);
-                if (match) channelName = match[1].trim();
+    <script>
+        let currentChannels = [];
+        let player;
+
+        // Initialize DASH player
+        function initPlayer() {
+            if (player) {
+                player.reset();
             }
-            // KODIPROP license_key
-            if (line.startsWith('#KODIPROP:inputstream.adaptive.license_key=')) {
-                let val = line.replace('#KODIPROP:inputstream.adaptive.license_key=', '').trim();
-                licenseKeyRaw = val;
-                if (val.includes(':')) {
-                    const parts = val.split(':');
-                    keyId = parts[0].trim();
-                    key = parts[1].trim();
+            const video = document.getElementById('videoPlayer');
+            player = dashjs.MediaPlayer().create();
+            player.initialize(video, null, true);
+            player.updateSettings({
+                'streaming': {
+                    'abandonLoadTimeout': 10000,
+                    'delayPlaybackAfterInit': 2000
+                }
+            });
+            return player;
+        }
+
+        // Main processing function
+        async function processStreams(INPUT_URL, DASH_PROXY) {
+            addStatus(`📥 Fetching remote stream.json from ${https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u}...`, 'info');
+            
+            try {
+                const res = await fetch(INPUT_URL);
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch JSON: ${res.status}`);
+                }
+                const raw = await res.json();
+
+                let channels;
+                if (Array.isArray(raw)) {
+                    channels = Object.entries({ ...raw });
                 } else {
-                    // maybe hex pair
-                    keyId = val;
+                    channels = Object.entries(raw);
                 }
+                
+                addStatus(`🔄 Processing ${channels.length} channels...`, 'info');
+
+                const result = channels
+                    .filter(([id, channel]) => {
+                        if (!channel.url) {
+                            addStatus(`⚠️ Skipping id=${id} — no url field`, 'warn');
+                            return false;
+                        }
+                        return true;
+                    })
+                    .map(([id, channel]) => {
+                        const { kid, key, url, group_title, tvg_logo, channel_name } = channel;
+
+                        const [mpdUrl, queryString] = url.split("?");
+                        const hdneaMatch = queryString ? queryString.match(/(hdnea=[^&]+)/) : null;
+                        const cookie = hdneaMatch ? hdneaMatch[1] : "";
+
+                        const bpkMatch = mpdUrl.match(/\/bpk-tv\/([^/]+)\//);
+                        let rawName = bpkMatch ? bpkMatch[1] : String(id);
+                        rawName = rawName.replace("_BTS", "");
+
+                        const displayName = channel_name || rawName.replace(/_/g, " ");
+
+                        let playerUrl = DASH_PROXY + encodeURIComponent(mpdUrl) +
+                            `&keyId=${encodeURIComponent(kid)}` +
+                            `&key=${encodeURIComponent(key)}`;
+                        
+                        if (cookie) {
+                            playerUrl += `&cookie=${encodeURIComponent(cookie)}`;
+                        }
+
+                        addStatus(`✅ ${displayName} (id: ${id}) | kid: ${kid}`, 'success');
+
+                        return {
+                            name: displayName,
+                            id: id,
+                            logo: tvg_logo,
+                            group: group_title,
+                            link: playerUrl,
+                            originalUrl: url,
+                            kid: kid
+                        };
+                    });
+
+                addStatus(`✨ Successfully processed ${result.length} channels!`, 'success');
+                return result;
+
+            } catch (error) {
+                addStatus(`❌ Error: ${error.message}`, 'error');
+                throw error;
             }
-            // EXTHTTP cookie JSON
-            if (line.startsWith('#EXTHTTP:')) {
-                let jsonStr = line.replace('#EXTHTTP:', '').trim();
-                try {
-                    let obj = JSON.parse(jsonStr);
-                    if (obj.cookie) cookieValue = obj.cookie;
-                } catch(e) {
-                    // fallback regex
-                    const cookieMatch = line.match(/\"cookie\"\s*:\s*\"([^\"]+)\"/);
-                    if (cookieMatch) cookieValue = cookieMatch[1];
-                }
+        }
+
+        // Display channels in grid
+        function displayChannels(channels) {
+            const grid = document.getElementById('channelGrid');
+            
+            if (!channels || channels.length === 0) {
+                grid.innerHTML = '<div class="loading"><div>No channels found</div></div>';
+                return;
             }
-            // manifest URL (line that does not start with # and contains http/https and .mpd)
-            if (!line.startsWith('#') && (line.includes('.mpd') || line.includes('index.mpd')) && (line.startsWith('http://') || line.startsWith('https://'))) {
-                // clean any # fragments or extra garbage
-                let rawUrl = line.split('#')[0].split('?')[0]; // base url without hash
-                if (line.includes('.mpd')) {
-                    // preserve full url without fragments that break? we take the base part before any extra # but keep query if exists
-                    let urlBeforeHash = line.split('#')[0];
-                    manifestUrl = urlBeforeHash;
+
+            grid.innerHTML = channels.map((channel, index) => `
+                <div class="channel-card" onclick="playChannel(${index})">
+                    ${channel.logo ? `<img class="channel-logo" src="${channel.logo}" onerror="this.src='https://via.placeholder.com/50x50?text=No+Logo'">` : 
+                                      `<div class="channel-logo" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 20px;">📺</div>`}
+                    <div class="channel-info">
+                        <div class="channel-name">${escapeHtml(channel.name)}</div>
+                        <div class="channel-group">${escapeHtml(channel.group || 'No Group')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Play selected channel
+        function playChannel(index) {
+            const channel = currentChannels[index];
+            if (!channel) return;
+
+            addStatus(`🎬 Playing: ${channel.name}`, 'info');
+            
+            // Update active state in UI
+            document.querySelectorAll('.channel-card').forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('active');
                 } else {
-                    manifestUrl = line;
+                    card.classList.remove('active');
                 }
+            });
+
+            // Initialize or reset player
+            if (!player) {
+                initPlayer();
+            } else {
+                player.attachSource(null);
+            }
+
+            // Load the stream
+            player.attachSource(channel.link);
+            
+            // Optional: Add custom headers if needed
+            player.setXhrWithCredentialsForType('', true);
+            
+            // Auto-play attempt
+            const video = document.getElementById('videoPlayer');
+            video.play().catch(e => {
+                addStatus(`⚠️ Auto-play prevented: ${e.message}. Click play button to start.`, 'warn');
+            });
+        }
+
+        // Helper functions
+        function addStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const entry = document.createElement('div');
+            entry.className = `status-entry ${type === 'error' ? 'error' : (type === 'success' ? 'success' : '')}`;
+            
+            const time = new Date().toLocaleTimeString();
+            let icon = 'ℹ️';
+            if (type === 'error') icon = '❌';
+            if (type === 'success') icon = '✅';
+            if (type === 'warn') icon = '⚠️';
+            
+            entry.textContent = `${time} ${icon} ${message}`;
+            statusDiv.appendChild(entry);
+            entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Limit status entries
+            while (statusDiv.children.length > 100) {
+                statusDiv.removeChild(statusDiv.firstChild);
             }
         }
 
-        // also try to extract if license_key line has alternate pattern
-        if (!keyId || !key) {
-            for (let line of lines) {
-                if (line.includes('license_key') && (line.includes(':') && line.includes('inputstream.adaptive'))) {
-                    const regex = /license_key=([a-f0-9]+):([a-f0-9]+)/i;
-                    const match = line.match(regex);
-                    if (match) {
-                        keyId = match[1];
-                        key = match[2];
-                        break;
-                    }
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        // Main load function
+        async function loadChannels() {
+            const inputUrl = document.getElementById('inputUrl').value;
+            const dashProxy = document.getElementById('dashProxy').value;
+            
+            if (!inputUrl || !dashProxy) {
+                addStatus('Please provide both URL and DASH Proxy', 'error');
+                return;
+            }
+
+            // Clear previous status
+            document.getElementById('status').innerHTML = '';
+            addStatus('🚀 Starting channel processing...', 'info');
+            
+            // Show loading in grid
+            document.getElementById('channelGrid').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading channels...</div>
+                </div>
+            `;
+
+            try {
+                // Process the streams
+                currentChannels = await processStreams(inputUrl, dashProxy);
+                
+                // Display in grid
+                displayChannels(currentChannels);
+                
+                addStatus(`📊 Total channels loaded: ${currentChannels.length}`, 'success');
+                
+                // Auto-play first channel if available
+                if (currentChannels.length > 0) {
+                    addStatus('🎯 Auto-playing first channel...', 'info');
+                    playChannel(0);
                 }
+                
+            } catch (error) {
+                addStatus(`Failed to load channels: ${error.message}`, 'error');
+                document.getElementById('channelGrid').innerHTML = `
+                    <div class="loading">
+                        <div>❌ Failed to load channels</div>
+                        <div style="font-size: 12px; margin-top: 10px;">${error.message}</div>
+                    </div>
+                `;
             }
         }
 
-        // fallback: if cookie missing but there is inline __hdnea__ in MPD url? but prefer from #EXTHTTP
-        if (!cookieValue) {
-            // sometimes cookie appears as part of #EXTHTTP or inside URL param ?__hdnea__= 
-            for (let line of lines) {
-                if (line.includes('__hdnea__') && line.includes('cookie')) {
-                    const match = line.match(/__hdnea__=([^&"\s]+)/);
-                    if (match && !cookieValue) cookieValue = `__hdnea__=${match[1]}`;
-                }
-            }
-        }
-
-        return { manifestUrl, keyId, key, cookieValue, channelName, licenseKeyRaw };
-    }
-
-    // Build the FULL raw stream URL (not encoded yet) according to spec: manifest?keyId=xxx&key=xxx&cookie=xxx
-    function buildRawStreamUrl(manifest, keyId, key, cookie) {
-        if (!manifest) return '';
-        let base = manifest.split('#')[0]; // remove any trailing fragments
-        let separator = base.includes('?') ? '&' : '?';
-        let url = `${base}${separator}keyId=${encodeURIComponent(keyId)}&key=${encodeURIComponent(key)}&cookie=${encodeURIComponent(cookie)}`;
-        return url;
-    }
-
-    // FULL PERCENT-ENCODED OUTPUT: encode the whole URL (including scheme, slashes, etc)
-    function getFullyEncodedOutput(rawUrl) {
-        if (!rawUrl) return '';
-        // encodeURIComponent encodes the entire URL string (so https:// becomes https%3A%2F%2F)
-        return encodeURIComponent(rawUrl);
-    }
-
-    // render results
-    function renderResult(parsed) {
-        const { manifestUrl, keyId, key, cookieValue, channelName } = parsed;
-        if (!manifestUrl || !keyId || !key || !cookieValue) {
-            alert("Missing required data! Need manifest URL (.mpd), keyId, key (license_key), and cookie from #EXTHTTP. Check M3U format.");
-            return false;
-        }
-
-        // Build raw decoded stream URL
-        const rawStreamUrl = buildRawStreamUrl(manifestUrl, keyId, key, cookieValue);
-        // FULLY ENCODE whole output (entire string)
-        const fullyEncoded = getFullyEncodedOutput(rawStreamUrl);
-        
-        // show meta section
-        const metaDiv = document.getElementById('extractedMeta');
-        metaDiv.style.display = 'flex';
-        metaDiv.innerHTML = `
-            <div class="meta-item">📺 ${escapeHtml(channelName || 'Channel')}</div>
-            <div class="meta-item">🔑 KeyID: ${escapeHtml(keyId)}</div>
-            <div class="meta-item">🗝️ Key: ${escapeHtml(key)}</div>
-            <div class="meta-item">🍪 Cookie (trimmed): ${escapeHtml(cookieValue.length > 60 ? cookieValue.substring(0, 60) + '…' : cookieValue)}</div>
-            <div class="meta-item">📡 MPD: ${escapeHtml(manifestUrl.split('?')[0].substring(0, 70))}...</div>
-        `;
-        
-        // show result box
-        const resultBox = document.getElementById('resultBox');
-        resultBox.style.display = 'block';
-        const encodedOutputDiv = document.getElementById('encodedLinkOutput');
-        encodedOutputDiv.innerHTML = `<span style="word-break:break-all; font-family:monospace;">${escapeHtml(fullyEncoded)}</span>`;
-        
-        // show decoded preview
-        const decodedNote = document.getElementById('decodedNote');
-        const decodedSpan = document.getElementById('decodedPreview');
-        decodedNote.style.display = 'block';
-        let shortPreview = rawStreamUrl.length > 150 ? rawStreamUrl.substring(0, 150) + '...' : rawStreamUrl;
-        decodedSpan.innerHTML = escapeHtml(shortPreview);
-        
-        // store encoded for copy
-        window.__lastEncoded = fullyEncoded;
-        window.__lastRaw = rawStreamUrl;
-        return true;
-    }
-
-    // main parse & generate from textarea
-    function processM3U() {
-        const rawText = document.getElementById('m3uInput').value;
-        if (!rawText.trim()) {
-            alert("Please paste M3U data containing EXTINF, license_key, cookie and MPD url.");
-            return;
-        }
-        const parsed = parseM3UBlock(rawText);
-        if (!parsed.manifestUrl) {
-            alert("Could not find MPD manifest URL (https://...index.mpd). Make sure the M3U contains a valid stream URL.");
-            return;
-        }
-        if (!parsed.keyId || !parsed.key) {
-            alert("Missing license_key (keyId:key). Example: #KODIPROP:inputstream.adaptive.license_key=49e84b9e...:19c82d3f...");
-            return;
-        }
-        if (!parsed.cookieValue) {
-            alert("Cookie not found! Need #EXTHTTP:{\"cookie\":\"__hdnea__=...\"} line.");
-            return;
-        }
-        renderResult(parsed);
-    }
-    
-    // load example exactly from the user requirement (original data)
-    function loadExample() {
-        const example = `#EXTINF:-1 tvg-id="3278" group-title="Sports" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Sports_1_Telugu_HD.png",Star Sports 1 Telugu HD
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=49e84b9edfd85379b90c81b7d2d3d2bf:19c82d3ff094fa06af95820a1572ecb5
-#EXTVLCOPT:http-user-agent=plaYtv/7.1.3 (Linux;Android 13) ygx/824.1 ExoPlayerLib/824.0
-#EXTHTTP:{"cookie":"__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c"}
-https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Telugu_HD_BTS/output/index.mpd?#__hdnea__=st=1775665100~exp=1775686700~acl=/*~hmac=e266cc5aca5b74568913129c6dc70a10091aae8cc26b97c02642c6b5435bcf1c`;
-        document.getElementById('m3uInput').value = example;
-        // auto process after example load? optional
-        processM3U();
-    }
-    
-    // copy fully encoded string
-    async function copyEncoded() {
-        if (!window.__lastEncoded) {
-            alert("No encoded link generated yet. Click 'Generate Encoded Link' first.");
-            return;
-        }
-        try {
-            await navigator.clipboard.writeText(window.__lastEncoded);
-            const copyBtn = document.getElementById('copyEncodedBtn');
-            const originalText = copyBtn.innerText;
-            copyBtn.innerText = '✅ Copied!';
-            setTimeout(() => {
-                copyBtn.innerText = originalText;
-            }, 2000);
-        } catch (err) {
-            alert("Manual copy failed: " + err);
-        }
-    }
-    
-    // Helper escape HTML
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initPlayer();
+            addStatus('🎥 Player ready. Enter your stream.json URL and proxy to begin.', 'success');
         });
-    }
-    
-    // Additional: also support optional custom parsing of license if present in different form
-    document.addEventListener('DOMContentLoaded', () => {
-        const parseBtn = document.getElementById('parseBtn');
-        const resetBtn = document.getElementById('resetExampleBtn');
-        const copyEncodedBtn = document.getElementById('copyEncodedBtn');
-        if (parseBtn) parseBtn.addEventListener('click', processM3U);
-        if (resetBtn) resetBtn.addEventListener('click', loadExample);
-        if (copyEncodedBtn) copyEncodedBtn.addEventListener('click', copyEncoded);
-        
-        // preload example on first load? show initial state but not auto process until click, but we set placeholder example
-        loadExample();  // loads example & auto-generates result (user sees output immediately)
-    });
-</script>
+    </script>
 </body>
 </html>
